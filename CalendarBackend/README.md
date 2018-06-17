@@ -1,24 +1,9 @@
-# README
+# CalendarBackend
+Base URL: http://api.localhost:3000/v1
 
-This README would normally document whatever steps are necessary to get the
-application up and running.
-
-Things you may want to cover:
-
-* Ruby version
-
-* System dependencies
-
-* Configuration
-
-* Database creation
-
-* Database initialization
-
-* How to run the test suite
-
-* Services (job queues, cache servers, search engines, etc.)
-
-* Deployment instructions
-
-* ...
+| Method | Endpoint       | Usage           |
+|:-------|:---------------|:----------------|
+| GET    | /v1/events     | Get all events  |
+| POST   | /v1/events     | Create an event |
+| PUT    | /v1/events/:id | Edit an event   |
+| DELETE | /v1/events/:id | Delete an event |

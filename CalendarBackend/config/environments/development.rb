@@ -54,5 +54,5 @@ Rails.application.configure do
 
   # Allows subdomaining to work on localhost
   # https://gist.github.com/indiesquidge/b836647f851179589765
-  config.action_dispatch.tld_length = 0
+  # config.action_dispatch.tld_length = 0
 end

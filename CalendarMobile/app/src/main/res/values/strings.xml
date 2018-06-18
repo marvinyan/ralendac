@@ -1,3 +1,4 @@
 <resources>
     <string name="app_name">Ralendac</string>
+    <string name="action_save">Save</string>
 </resources>

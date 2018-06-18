@@ -1,9 +1,13 @@
 package me.marvinyan.ralendac;
 
 import android.app.TimePickerDialog;
+import android.content.Context;
 import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
+import android.view.Menu;
+import android.view.MenuInflater;
 import android.view.View;
+import android.view.inputmethod.InputMethodManager;
 import android.widget.EditText;
 import android.widget.TextView;
 import android.widget.TimePicker;
@@ -34,6 +38,16 @@ public class MainActivity extends AppCompatActivity {
         mStartTimeTextView = findViewById(R.id.tv_start_time);
         mEndTimeTextView = findViewById(R.id.tv_end_time);
 
+        // Hide keyboard when clicking outside of description EditText
+        mDescriptionEditText.setOnFocusChangeListener(new View.OnFocusChangeListener() {
+            @Override
+            public void onFocusChange(View view, boolean focused) {
+                if (!focused) {
+                    hideKeyboard(view);
+                }
+            }
+        });
+
         Calendar cal = Calendar.getInstance();
         int hour = cal.get(Calendar.HOUR_OF_DAY);
         int minute = cal.get(Calendar.MINUTE);
@@ -56,7 +70,14 @@ public class MainActivity extends AppCompatActivity {
         updateTimeTextViews();
     }
 
-    public void displayTimePickerDialog(final View view) {
+    @Override
+    public boolean onCreateOptionsMenu(Menu menu) {
+        MenuInflater menuInflater = getMenuInflater();
+        menuInflater.inflate(R.menu.event, menu);
+        return true;
+    }
+
+    public void displayTimePickerDialog(View view) {
         mDescriptionEditText.clearFocus();
 
         /*
@@ -101,6 +122,13 @@ public class MainActivity extends AppCompatActivity {
         }
 
         timePickerDialog.show();
+    }
+
+    private void hideKeyboard(View view) {
+        InputMethodManager imm = (InputMethodManager) getSystemService(Context.INPUT_METHOD_SERVICE);
+        if (imm != null) {
+            imm.hideSoftInputFromWindow(view.getWindowToken(), 0);
+        }
     }
 
     private void updateTimeTextViews() {

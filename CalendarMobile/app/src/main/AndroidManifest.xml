@@ -20,9 +20,7 @@
             </intent-filter>
         </activity>
 
-        <activity
-            android:name=".EventActivity"
-            android:parentActivityName=".MainActivity" />
+        <activity android:name=".EventActivity" />
     </application>
 
 </manifest>

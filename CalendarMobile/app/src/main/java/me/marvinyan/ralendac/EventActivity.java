@@ -13,9 +13,9 @@ import android.widget.EditText;
 import android.widget.TextView;
 import android.widget.TimePicker;
 
-import java.text.SimpleDateFormat;
-import java.util.Calendar;
-import java.util.Locale;
+import org.joda.time.LocalTime;
+import org.joda.time.format.DateTimeFormat;
+import org.joda.time.format.DateTimeFormatter;
 
 public class EventActivity extends AppCompatActivity {
     private EditText mDescriptionEditText;
@@ -27,15 +27,10 @@ public class EventActivity extends AppCompatActivity {
     private int endHour;
     private int endMinute;
 
-    private String startIsoDate;
-    private String endIsoDate;
-
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_event);
-
-        setupToolbar();
 
         mDescriptionEditText = findViewById(R.id.tv_description);
         mStartTimeTextView = findViewById(R.id.tv_start_time);
@@ -51,26 +46,8 @@ public class EventActivity extends AppCompatActivity {
             }
         });
 
-        Calendar cal = Calendar.getInstance();
-        int hour = cal.get(Calendar.HOUR_OF_DAY);
-        int minute = cal.get(Calendar.MINUTE);
-
-        // Creating new event:
-        //      - Set start time to current time.
-        //      - Set end time to the lesser of 1 hour after start time or 11:59pm.
-        startHour = hour;
-        startMinute = minute;
-
-        hour++;
-        if (hour == 24) {
-            hour = 23;
-            minute = 59;
-        }
-
-        endHour = hour;
-        endMinute = minute;
-
-        updateTimeTextViews();
+        setupToolbar();
+        setupInitialTimes();
     }
 
     @Override
@@ -135,6 +112,30 @@ public class EventActivity extends AppCompatActivity {
             actionBar.setHomeAsUpIndicator(R.drawable.ic_action_close);
         }
     }
+
+    private void setupInitialTimes() {
+        LocalTime now = new LocalTime();
+        int hour = now.getHourOfDay();
+        int minute = now.getMinuteOfHour();
+
+        // Creating new event:
+        //      - Set start time to current time.
+        //      - Set end time to the lesser of 1 hour after start time or 11:59pm.
+        startHour = hour;
+        startMinute = minute;
+
+        hour++;
+        if (hour == 24) {
+            hour = 23;
+            minute = 59;
+        }
+
+        endHour = hour;
+        endMinute = minute;
+
+        updateTimeTextViews();
+    }
+
     private void hideKeyboard(View view) {
         InputMethodManager imm = (InputMethodManager) getSystemService(Context.INPUT_METHOD_SERVICE);
         if (imm != null) {
@@ -143,16 +144,12 @@ public class EventActivity extends AppCompatActivity {
     }
 
     private void updateTimeTextViews() {
-        SimpleDateFormat timeFormat = new SimpleDateFormat("h:mm a", Locale.US);
-        Calendar cal = Calendar.getInstance();
+        LocalTime startTime = new LocalTime(startHour, startMinute);
+        LocalTime endTime = new LocalTime(endHour, endMinute);
+        DateTimeFormatter formatter = DateTimeFormat.forPattern("h:mm a");
 
-        cal.set(Calendar.HOUR_OF_DAY, startHour);
-        cal.set(Calendar.MINUTE, startMinute);
-        mStartTimeTextView.setText(timeFormat.format(cal.getTime()));
-
-        cal.set(Calendar.HOUR_OF_DAY, endHour);
-        cal.set(Calendar.MINUTE, endMinute);
-        mEndTimeTextView.setText(timeFormat.format(cal.getTime()));
+        mStartTimeTextView.setText(formatter.print(startTime));
+        mEndTimeTextView.setText(formatter.print(endTime));
     }
 
     private boolean validTimeRange() {

@@ -2,6 +2,7 @@ package me.marvinyan.ralendac;
 
 import android.app.TimePickerDialog;
 import android.content.Context;
+import android.content.Intent;
 import android.os.Bundle;
 import android.support.v7.app.ActionBar;
 import android.support.v7.app.AppCompatActivity;
@@ -12,6 +13,7 @@ import android.view.inputmethod.InputMethodManager;
 import android.widget.EditText;
 import android.widget.TextView;
 import android.widget.TimePicker;
+import android.widget.Toast;
 
 import org.joda.time.LocalTime;
 import org.joda.time.format.DateTimeFormat;
@@ -22,10 +24,8 @@ public class EventActivity extends AppCompatActivity {
     private TextView mStartTimeTextView;
     private TextView mEndTimeTextView;
 
-    private int startHour;
-    private int startMinute;
-    private int endHour;
-    private int endMinute;
+    private LocalTime mStartTime;
+    private LocalTime mEndTime;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -74,31 +74,31 @@ public class EventActivity extends AppCompatActivity {
 
                 @Override
                 public void onTimeSet(TimePicker timePicker, int hour, int minute) {
-                    startHour = hour;
-                    startMinute = minute;
+                    mStartTime = new LocalTime(hour, minute);
 
                     if (!validTimeRange()) {
-                        endHour = startHour;
-                        endMinute = startMinute;
+                        mEndTime = mStartTime;
+                        Toast.makeText(EventActivity.this, "The end time has been reset to the start time.", Toast.LENGTH_LONG).show();
                     }
+
                     updateTimeTextViews();
                 }
-            }, startHour, startMinute, false);
+            }, mStartTime.getHourOfDay(), mStartTime.getMinuteOfHour(), false);
         } else {
             timePickerDialog = new TimePickerDialog(EventActivity.this, new TimePickerDialog.OnTimeSetListener() {
 
                 @Override
                 public void onTimeSet(TimePicker timePicker, int hour, int minute) {
-                    endHour = hour;
-                    endMinute = minute;
+                    mEndTime = new LocalTime(hour, minute);
 
                     if (!validTimeRange()) {
-                        startHour = endHour;
-                        startMinute = endMinute;
+                        mStartTime = mEndTime;
+                        Toast.makeText(EventActivity.this, "The start time has been reset to the end time.", Toast.LENGTH_LONG).show();
                     }
+
                     updateTimeTextViews();
                 }
-            }, endHour, endMinute, false);
+            }, mEndTime.getHourOfDay(), mEndTime.getMinuteOfHour(), false);
         }
 
         timePickerDialog.show();
@@ -114,24 +114,24 @@ public class EventActivity extends AppCompatActivity {
     }
 
     private void setupInitialTimes() {
-        LocalTime now = new LocalTime();
-        int hour = now.getHourOfDay();
-        int minute = now.getMinuteOfHour();
+        // Editing event:
+        //      - Restore all fields
+        Intent parentIntent = getIntent();
+        if (parentIntent.hasExtra("description")) {
+            mDescriptionEditText.setText(parentIntent.getStringExtra("description"));
+            mStartTime = (LocalTime) parentIntent.getSerializableExtra("startTime");
+            mEndTime = (LocalTime) parentIntent.getSerializableExtra("endTime");
+        } else {
+            // Creating new event:
+            //      - Set start time to current time.
+            //      - Set end time to the lesser of 1 hour after start time or 11:59pm.
+            mStartTime = new LocalTime();
+            mEndTime = mStartTime.plusHours(1);
 
-        // Creating new event:
-        //      - Set start time to current time.
-        //      - Set end time to the lesser of 1 hour after start time or 11:59pm.
-        startHour = hour;
-        startMinute = minute;
-
-        hour++;
-        if (hour == 24) {
-            hour = 23;
-            minute = 59;
+            if (!validTimeRange()) {
+                mEndTime = new LocalTime(23, 59);
+            }
         }
-
-        endHour = hour;
-        endMinute = minute;
 
         updateTimeTextViews();
     }
@@ -144,16 +144,14 @@ public class EventActivity extends AppCompatActivity {
     }
 
     private void updateTimeTextViews() {
-        LocalTime startTime = new LocalTime(startHour, startMinute);
-        LocalTime endTime = new LocalTime(endHour, endMinute);
         DateTimeFormatter formatter = DateTimeFormat.forPattern("h:mm a");
 
-        mStartTimeTextView.setText(formatter.print(startTime));
-        mEndTimeTextView.setText(formatter.print(endTime));
+        mStartTimeTextView.setText(formatter.print(mStartTime));
+        mEndTimeTextView.setText(formatter.print(mEndTime));
     }
 
     private boolean validTimeRange() {
-        return (startHour < endHour) || (startHour == endHour && startMinute <= endMinute);
+        return !mEndTime.isBefore(mStartTime);
     }
 
     // Close activity instead of up navigating

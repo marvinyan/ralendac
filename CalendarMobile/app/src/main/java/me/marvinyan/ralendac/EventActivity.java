@@ -8,6 +8,7 @@ import android.support.v7.app.ActionBar;
 import android.support.v7.app.AppCompatActivity;
 import android.view.Menu;
 import android.view.MenuInflater;
+import android.view.MenuItem;
 import android.view.View;
 import android.view.inputmethod.InputMethodManager;
 import android.widget.EditText;
@@ -15,6 +16,8 @@ import android.widget.TextView;
 import android.widget.TimePicker;
 import android.widget.Toast;
 
+import org.joda.time.LocalDate;
+import org.joda.time.LocalDateTime;
 import org.joda.time.LocalTime;
 import org.joda.time.format.DateTimeFormat;
 import org.joda.time.format.DateTimeFormatter;
@@ -24,8 +27,10 @@ public class EventActivity extends AppCompatActivity {
     private TextView mStartTimeTextView;
     private TextView mEndTimeTextView;
 
-    private LocalTime mStartTime;
-    private LocalTime mEndTime;
+    private LocalDate mSelectedDate;
+    private LocalDateTime mStartTime;
+    private LocalDateTime mEndTime;
+    private int mEventId;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -57,6 +62,21 @@ public class EventActivity extends AppCompatActivity {
         return true;
     }
 
+    @Override
+    public boolean onOptionsItemSelected(MenuItem item) {
+        mDescriptionEditText.clearFocus();
+        if (item.getItemId() == R.id.action_save) {
+            String description = mDescriptionEditText.getText().toString().trim();
+
+            if (description.equals("")) {
+                Toast.makeText(EventActivity.this, "Please fill in a description", Toast.LENGTH_LONG).show();
+            } else {
+                // POST/PUT to backend
+            }
+        }
+        return super.onOptionsItemSelected(item);
+    }
+
     public void displayTimePickerDialog(View view) {
         mDescriptionEditText.clearFocus();
 
@@ -66,6 +86,8 @@ public class EventActivity extends AppCompatActivity {
                     - Set end time to start time.
             2) End time was set earlier than start time.
                     - Set start time to end time.
+            3) Start time is <= end time:
+                    - Normal operation. Set times according to user input.
         */
         TimePickerDialog timePickerDialog;
 
@@ -74,9 +96,9 @@ public class EventActivity extends AppCompatActivity {
 
                 @Override
                 public void onTimeSet(TimePicker timePicker, int hour, int minute) {
-                    mStartTime = new LocalTime(hour, minute);
+                    mStartTime = new LocalDateTime(mSelectedDate.getYear(), mSelectedDate.getMonthOfYear(), mSelectedDate.getDayOfMonth(), hour, minute);
 
-                    if (!validTimeRange()) {
+                    if (!isValidTimeRange()) {
                         mEndTime = mStartTime;
                         Toast.makeText(EventActivity.this, "The end time has been reset to the start time.", Toast.LENGTH_LONG).show();
                     }
@@ -89,9 +111,9 @@ public class EventActivity extends AppCompatActivity {
 
                 @Override
                 public void onTimeSet(TimePicker timePicker, int hour, int minute) {
-                    mEndTime = new LocalTime(hour, minute);
+                    mEndTime = new LocalDateTime(mSelectedDate.getYear(), mSelectedDate.getMonthOfYear(), mSelectedDate.getDayOfMonth(), hour, minute);
 
-                    if (!validTimeRange()) {
+                    if (!isValidTimeRange()) {
                         mStartTime = mEndTime;
                         Toast.makeText(EventActivity.this, "The start time has been reset to the end time.", Toast.LENGTH_LONG).show();
                     }
@@ -117,19 +139,23 @@ public class EventActivity extends AppCompatActivity {
         // Editing event:
         //      - Restore all fields
         Intent parentIntent = getIntent();
-        if (parentIntent.hasExtra("description")) {
+        if (parentIntent.hasExtra("eventId")) {
+            mEventId = parentIntent.getIntExtra("eventId", -1);
             mDescriptionEditText.setText(parentIntent.getStringExtra("description"));
-            mStartTime = (LocalTime) parentIntent.getSerializableExtra("startTime");
-            mEndTime = (LocalTime) parentIntent.getSerializableExtra("endTime");
+            mStartTime = (LocalDateTime) parentIntent.getSerializableExtra("startTime");
+            mEndTime = (LocalDateTime) parentIntent.getSerializableExtra("endTime");
+            mSelectedDate = new LocalDate(mStartTime.getYear(), mStartTime.getMonthOfYear(), mStartTime.getDayOfMonth());
         } else {
             // Creating new event:
-            //      - Set start time to current time.
+            //      - Set start time to selected date with current time.
             //      - Set end time to the lesser of 1 hour after start time or 11:59pm.
-            mStartTime = new LocalTime();
+            LocalTime now = new LocalTime();
+            mSelectedDate = (LocalDate) parentIntent.getSerializableExtra("selectedDate");
+            mStartTime = new LocalDateTime(mSelectedDate.getYear(), mSelectedDate.getMonthOfYear(), mSelectedDate.getDayOfMonth(), now.getHourOfDay(), now.getMinuteOfHour());
             mEndTime = mStartTime.plusHours(1);
 
-            if (!validTimeRange()) {
-                mEndTime = new LocalTime(23, 59);
+            if (!isValidTimeRange()) {
+                mEndTime = new LocalDateTime(mSelectedDate.getYear(), mSelectedDate.getMonthOfYear(), mSelectedDate.getDayOfMonth(), 23, 59);
             }
         }
 
@@ -150,8 +176,9 @@ public class EventActivity extends AppCompatActivity {
         mEndTimeTextView.setText(formatter.print(mEndTime));
     }
 
-    private boolean validTimeRange() {
-        return !mEndTime.isBefore(mStartTime);
+    private boolean isValidTimeRange() {
+        // Ensure 1-day event and end time is >= start time
+        return mStartTime.toLocalDate().isEqual(mEndTime.toLocalDate()) && !mEndTime.isBefore(mStartTime);
     }
 
     // Close activity instead of up navigating

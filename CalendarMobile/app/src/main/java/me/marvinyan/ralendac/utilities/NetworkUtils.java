@@ -1,20 +1,13 @@
 package me.marvinyan.ralendac.utilities;
 
 import android.net.Uri;
-import android.util.Log;
 
-import java.io.IOException;
-import java.io.InputStream;
-import java.net.HttpURLConnection;
 import java.net.MalformedURLException;
 import java.net.URL;
-import java.util.Scanner;
 
 import me.marvinyan.ralendac.models.Event;
 
 public class NetworkUtils {
-    private static final String TAG = NetworkUtils.class.getSimpleName();
-
     private static final String BASE_URL = "https://api-cal.herokuapp.com/";
     private static final String API_VERSION = "v1";
     private static final String EVENT_ENDPOINT = "events";
@@ -34,33 +27,39 @@ public class NetworkUtils {
             e.printStackTrace();
         }
 
-        Log.i(TAG, "Built URI " + url);
-
         return url;
     }
 
-    // Returns all events as JSON
-    public static String getEvents(URL url) throws IOException {
-        HttpURLConnection urlConnection = (HttpURLConnection) url.openConnection();
-        try {
-            InputStream in = urlConnection.getInputStream();
-            Scanner scanner = new Scanner(in);
-            scanner.useDelimiter("\\A"); // \A = beginning of string
-
-            if (scanner.hasNext()) {
-                return scanner.next();
-            } else {
-                return null;
-            }
-        } finally {
-            urlConnection.disconnect();
-        }
-    }
-
     // Create and return new event as JSON
-    public static String postEvent(URL url, Event event) {
-        return "";
-    }
+//    public static String postEvent(URL url, Event event) throws IOException {
+//        HttpURLConnection connection = (HttpURLConnection) url.openConnection();
+//        connection.setRequestMethod("POST");
+//        connection.setDoOutput(true);
+//
+//        List<Pair<String, String>> params = new ArrayList<>();
+//
+//        DateTimeFormatter isoFormat = ISODateTimeFormat.dateTime();
+//        DateTime utcStartTime = event.getStartTime().toDateTime(DateTimeZone.UTC);
+//        DateTime utcEndTime = event.getEndTime().toDateTime(DateTimeZone.UTC);
+//
+//        params.add(new Pair<>("description", event.getDescription()));
+//        params.add(new Pair<>("start_time", utcStartTime.toString(isoFormat)));
+//        params.add(new Pair<>("end_time", utcEndTime.toString(isoFormat)));
+//
+//        try {
+//            InputStream in = connection.getInputStream();
+//            Scanner scanner = new Scanner(in);
+//            scanner.useDelimiter("\\A"); //
+//
+//            if (scanner.hasNext()) {
+//                return scanner.next();
+//            } else {
+//                return null;
+//            }
+//        } finally {
+//            connection.disconnect();
+//        }
+//    }
 
     // Edit and return updated event as JSON
     public static String putEvent(URL url, Event event) {

@@ -1,7 +1,6 @@
 package me.marvinyan.ralendac;
 
 import android.content.Intent;
-import android.os.AsyncTask;
 import android.os.Bundle;
 import android.support.v4.widget.SwipeRefreshLayout;
 import android.support.v7.app.AppCompatActivity;
@@ -11,25 +10,27 @@ import android.widget.TextView;
 import org.joda.time.LocalDate;
 import org.joda.time.LocalDateTime;
 
-import java.io.IOException;
-import java.net.URL;
-
 import me.marvinyan.ralendac.models.Event;
 import me.marvinyan.ralendac.utilities.NetworkUtils;
+import me.marvinyan.ralendac.utilities.VolleyResponseListener;
+import me.marvinyan.ralendac.utilities.VolleyUtils;
 
 public class MainActivity extends AppCompatActivity {
-    private SwipeRefreshLayout swipeRefreshLayout;
+    public SwipeRefreshLayout swipeLayout;
+    public TextView mLogTextView;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
-        swipeRefreshLayout = findViewById(R.id.swipeLayout);
-        swipeRefreshLayout.setOnRefreshListener(new SwipeRefreshLayout.OnRefreshListener() {
+        mLogTextView = findViewById(R.id.tv_json_log);
+
+        swipeLayout = findViewById(R.id.swipeLayout);
+        swipeLayout.setOnRefreshListener(new SwipeRefreshLayout.OnRefreshListener() {
             @Override
             public void onRefresh() {
-                new FetchAllEventsTask().execute();
+                getEvents();
             }
         });
     }
@@ -55,25 +56,20 @@ public class MainActivity extends AppCompatActivity {
         startActivity(eventActivityIntent);
     }
 
-    public class FetchAllEventsTask extends AsyncTask<Void, Void, String> {
-        @Override
-        protected String doInBackground(Void... voids) {
-            URL getUrl = NetworkUtils.buildEventUrl(null);
-            try {
-                String jsonResponse = NetworkUtils.getEvents(getUrl);
-//            Event[] jsonEventsData = JsonUtils.getEventsFromJson(MainActivity.this, jsonResponse);
-                return jsonResponse;
-            } catch (IOException e) {
-                e.printStackTrace();
-                return null;
+    private void getEvents() {
+        String eventsUrlStr = NetworkUtils.buildEventUrl(null).toString();
+        VolleyUtils.get(MainActivity.this, eventsUrlStr, new VolleyResponseListener() {
+            @Override
+            public void onError(String message) {
+                mLogTextView.setText(message);
+                swipeLayout.setRefreshing(false);
             }
-        }
 
-        @Override
-        protected void onPostExecute(String json) {
-            swipeRefreshLayout.setRefreshing(false);
-            TextView tv = findViewById(R.id.tv_json_log);
-            tv.setText(json);
-        }
+            @Override
+            public void onResponse(String response) {
+                mLogTextView.setText(response);
+                swipeLayout.setRefreshing(false);
+            }
+        });
     }
 }

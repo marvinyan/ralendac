@@ -22,6 +22,8 @@ import org.joda.time.LocalTime;
 import org.joda.time.format.DateTimeFormat;
 import org.joda.time.format.DateTimeFormatter;
 
+import me.marvinyan.ralendac.models.Event;
+
 public class EventActivity extends AppCompatActivity {
     private EditText mDescriptionEditText;
     private TextView mStartTimeTextView;
@@ -71,7 +73,13 @@ public class EventActivity extends AppCompatActivity {
             if (description.equals("")) {
                 Toast.makeText(EventActivity.this, "Please fill in a description", Toast.LENGTH_LONG).show();
             } else {
-                // POST/PUT to backend
+                Event event = new Event(mEventId, mDescriptionEditText.getText().toString(), mStartTime, mEndTime);
+
+                if (mEventId == -1) {
+
+                } else {
+
+                }
             }
         }
         return super.onOptionsItemSelected(item);
@@ -139,8 +147,9 @@ public class EventActivity extends AppCompatActivity {
         // Editing event:
         //      - Restore all fields
         Intent parentIntent = getIntent();
+        mEventId = parentIntent.getIntExtra("eventId", -1);
+
         if (parentIntent.hasExtra("eventId")) {
-            mEventId = parentIntent.getIntExtra("eventId", -1);
             mDescriptionEditText.setText(parentIntent.getStringExtra("description"));
             mStartTime = (LocalDateTime) parentIntent.getSerializableExtra("startTime");
             mEndTime = (LocalDateTime) parentIntent.getSerializableExtra("endTime");

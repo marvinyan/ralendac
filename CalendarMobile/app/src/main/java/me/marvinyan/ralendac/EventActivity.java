@@ -61,6 +61,15 @@ public class EventActivity extends AppCompatActivity {
     public boolean onCreateOptionsMenu(Menu menu) {
         MenuInflater menuInflater = getMenuInflater();
         menuInflater.inflate(R.menu.event, menu);
+
+        // Show delete option only if editing
+        Intent parentIntent = getIntent();
+        MenuItem deleteBtn = menu.findItem(R.id.action_delete);
+
+        if (parentIntent.hasExtra("eventId")) {
+            deleteBtn.setVisible(true);
+        }
+
         return true;
     }
 

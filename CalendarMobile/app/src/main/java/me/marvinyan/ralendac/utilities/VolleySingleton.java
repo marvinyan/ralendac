@@ -8,10 +8,11 @@ import com.android.volley.toolbox.Volley;
 
 /**
  * Google's recommended singleton pattern for maintaining a single instance of RequestQueue.
- * <p>
- * https://developer.android.com/training/volley/requestqueue#singleton
+ *
+ * <p>https://developer.android.com/training/volley/requestqueue#singleton
  */
 public class VolleySingleton {
+
     private static VolleySingleton mInstance;
     private RequestQueue mRequestQueue;
     private static Context mCtx;

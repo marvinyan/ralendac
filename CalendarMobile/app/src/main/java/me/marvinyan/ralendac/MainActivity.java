@@ -9,13 +9,17 @@ import android.widget.TextView;
 
 import org.joda.time.LocalDate;
 import org.joda.time.LocalDateTime;
+import org.json.JSONException;
+import org.json.JSONObject;
 
 import me.marvinyan.ralendac.models.Event;
+import me.marvinyan.ralendac.utilities.JsonUtils;
 import me.marvinyan.ralendac.utilities.NetworkUtils;
 import me.marvinyan.ralendac.utilities.VolleyResponseListener;
 import me.marvinyan.ralendac.utilities.VolleyUtils;
 
 public class MainActivity extends AppCompatActivity {
+
     private SwipeRefreshLayout swipeLayout;
     private TextView mLogTextView;
     private Event[] allEvents;
@@ -28,12 +32,13 @@ public class MainActivity extends AppCompatActivity {
         mLogTextView = findViewById(R.id.tv_json_log);
 
         swipeLayout = findViewById(R.id.swipeLayout);
-        swipeLayout.setOnRefreshListener(new SwipeRefreshLayout.OnRefreshListener() {
-            @Override
-            public void onRefresh() {
-                getEvents();
-            }
-        });
+        swipeLayout.setOnRefreshListener(
+                new SwipeRefreshLayout.OnRefreshListener() {
+                    @Override
+                    public void onRefresh() {
+                        getEvents();
+                    }
+                });
 
         getEvents();
     }
@@ -47,13 +52,12 @@ public class MainActivity extends AppCompatActivity {
         startActivity(eventActivityIntent);
     }
 
-
     public void showEditEventActivity(View view) {
         Intent eventActivityIntent = new Intent(MainActivity.this, EventActivity.class);
 
         // Simulate extracting from selected event
         LocalDateTime startTime = new LocalDateTime(2018, 6, 19, 8, 15);
-        LocalDateTime endTime = new LocalDateTime(2018, 6, 19,12, 30);
+        LocalDateTime endTime = new LocalDateTime(2018, 6, 19, 12, 30);
         Event selectedEvent = new Event(5, "Test description", startTime, endTime);
 
         eventActivityIntent.putExtra("eventId", selectedEvent.getId());
@@ -66,18 +70,32 @@ public class MainActivity extends AppCompatActivity {
 
     private void getEvents() {
         String eventsUrlStr = NetworkUtils.buildEventUrl(null).toString();
-        VolleyUtils.get(MainActivity.this, eventsUrlStr, new VolleyResponseListener() {
-            @Override
-            public void onError(String message) {
-                mLogTextView.setText(message);
-                swipeLayout.setRefreshing(false);
-            }
+        VolleyUtils.get(
+                MainActivity.this,
+                eventsUrlStr,
+                new VolleyResponseListener() {
+                    @Override
+                    public void onError(String message) {
+                        mLogTextView.setText(message);
+                        swipeLayout.setRefreshing(false);
+                    }
 
-            @Override
-            public void onResponse(String response) {
-                mLogTextView.setText(response);
-                swipeLayout.setRefreshing(false);
-            }
-        });
+                    @Override
+                    public void onResponse(Object response) {
+                        try {
+                            Event[] allEvents = JsonUtils.getEventsFromJson((JSONObject) response);
+                            StringBuilder builder = new StringBuilder();
+
+                            for (Event event : allEvents) {
+                                builder.append(event.toString() + "\n");
+                            }
+
+                            mLogTextView.setText(builder.toString());
+                        } catch (JSONException e) {
+                            e.printStackTrace();
+                        }
+                        swipeLayout.setRefreshing(false);
+                    }
+                });
     }
 }

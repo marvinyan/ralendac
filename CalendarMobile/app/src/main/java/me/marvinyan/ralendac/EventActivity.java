@@ -25,6 +25,7 @@ import org.joda.time.format.DateTimeFormatter;
 import me.marvinyan.ralendac.models.Event;
 
 public class EventActivity extends AppCompatActivity {
+
     private EditText mDescriptionEditText;
     private TextView mStartTimeTextView;
     private TextView mEndTimeTextView;
@@ -44,14 +45,15 @@ public class EventActivity extends AppCompatActivity {
         mEndTimeTextView = findViewById(R.id.tv_end_time);
 
         // Hide keyboard when clicking outside of description EditText
-        mDescriptionEditText.setOnFocusChangeListener(new View.OnFocusChangeListener() {
-            @Override
-            public void onFocusChange(View view, boolean focused) {
-                if (!focused) {
-                    hideKeyboard(view);
-                }
-            }
-        });
+        mDescriptionEditText.setOnFocusChangeListener(
+                new View.OnFocusChangeListener() {
+                    @Override
+                    public void onFocusChange(View view, boolean focused) {
+                        if (!focused) {
+                            hideKeyboard(view);
+                        }
+                    }
+                });
 
         setupToolbar();
         setupInitialTimes();
@@ -80,9 +82,13 @@ public class EventActivity extends AppCompatActivity {
             String description = mDescriptionEditText.getText().toString().trim();
 
             if (description.equals("")) {
-                Toast.makeText(EventActivity.this, "Please fill in a description", Toast.LENGTH_LONG).show();
+                Toast.makeText(EventActivity.this, "Please fill in a description",
+                        Toast.LENGTH_LONG)
+                        .show();
             } else {
-                Event event = new Event(mEventId, mDescriptionEditText.getText().toString(), mStartTime, mEndTime);
+                Event event =
+                        new Event(mEventId, mDescriptionEditText.getText().toString(), mStartTime,
+                                mEndTime);
 
                 if (mEventId == -1) {
 
@@ -97,47 +103,81 @@ public class EventActivity extends AppCompatActivity {
     public void displayTimePickerDialog(View view) {
         mDescriptionEditText.clearFocus();
 
-        /*
-            Possible states:
-            1) Start time was set later than end time:
-                    - Set end time to start time.
-            2) End time was set earlier than start time.
-                    - Set start time to end time.
-            3) Start time is <= end time:
-                    - Normal operation. Set times according to user input.
-        */
+    /*
+        Possible states:
+        1) Start time was set later than end time:
+                - Set end time to start time.
+        2) End time was set earlier than start time.
+                - Set start time to end time.
+        3) Start time is <= end time:
+                - Normal operation. Set times according to user input.
+    */
         TimePickerDialog timePickerDialog;
 
         if (view.getId() == R.id.tv_start_time) {
-            timePickerDialog = new TimePickerDialog(EventActivity.this, new TimePickerDialog.OnTimeSetListener() {
+            timePickerDialog =
+                    new TimePickerDialog(
+                            EventActivity.this,
+                            new TimePickerDialog.OnTimeSetListener() {
 
-                @Override
-                public void onTimeSet(TimePicker timePicker, int hour, int minute) {
-                    mStartTime = new LocalDateTime(mSelectedDate.getYear(), mSelectedDate.getMonthOfYear(), mSelectedDate.getDayOfMonth(), hour, minute);
+                                @Override
+                                public void onTimeSet(TimePicker timePicker, int hour, int minute) {
+                                    mStartTime =
+                                            new LocalDateTime(
+                                                    mSelectedDate.getYear(),
+                                                    mSelectedDate.getMonthOfYear(),
+                                                    mSelectedDate.getDayOfMonth(),
+                                                    hour,
+                                                    minute);
 
-                    if (!isValidTimeRange()) {
-                        mEndTime = mStartTime;
-                        Toast.makeText(EventActivity.this, "The end time has been reset to the start time.", Toast.LENGTH_LONG).show();
-                    }
+                                    if (!isValidTimeRange()) {
+                                        mEndTime = mStartTime;
+                                        Toast.makeText(
+                                                EventActivity.this,
+                                                "The end time has been reset to the "
+                                                        + "start time.",
+                                                Toast.LENGTH_LONG)
+                                                .show();
+                                    }
 
-                    updateTimeTextViews();
-                }
-            }, mStartTime.getHourOfDay(), mStartTime.getMinuteOfHour(), false);
+                                    updateTimeTextViews();
+                                }
+                            },
+                            mStartTime.getHourOfDay(),
+                            mStartTime.getMinuteOfHour(),
+                            false);
         } else {
-            timePickerDialog = new TimePickerDialog(EventActivity.this, new TimePickerDialog.OnTimeSetListener() {
+            timePickerDialog =
+                    new TimePickerDialog(
+                            EventActivity.this,
+                            new TimePickerDialog.OnTimeSetListener() {
 
-                @Override
-                public void onTimeSet(TimePicker timePicker, int hour, int minute) {
-                    mEndTime = new LocalDateTime(mSelectedDate.getYear(), mSelectedDate.getMonthOfYear(), mSelectedDate.getDayOfMonth(), hour, minute);
+                                @Override
+                                public void onTimeSet(TimePicker timePicker, int hour, int minute) {
+                                    mEndTime =
+                                            new LocalDateTime(
+                                                    mSelectedDate.getYear(),
+                                                    mSelectedDate.getMonthOfYear(),
+                                                    mSelectedDate.getDayOfMonth(),
+                                                    hour,
+                                                    minute);
 
-                    if (!isValidTimeRange()) {
-                        mStartTime = mEndTime;
-                        Toast.makeText(EventActivity.this, "The start time has been reset to the end time.", Toast.LENGTH_LONG).show();
-                    }
+                                    if (!isValidTimeRange()) {
+                                        mStartTime = mEndTime;
+                                        Toast.makeText(
+                                                EventActivity.this,
+                                                "The start time has been reset to the "
+                                                        + "end time.",
+                                                Toast.LENGTH_LONG)
+                                                .show();
+                                    }
 
-                    updateTimeTextViews();
-                }
-            }, mEndTime.getHourOfDay(), mEndTime.getMinuteOfHour(), false);
+                                    updateTimeTextViews();
+                                }
+                            },
+                            mEndTime.getHourOfDay(),
+                            mEndTime.getMinuteOfHour(),
+                            false);
         }
 
         timePickerDialog.show();
@@ -162,18 +202,33 @@ public class EventActivity extends AppCompatActivity {
             mDescriptionEditText.setText(parentIntent.getStringExtra("description"));
             mStartTime = (LocalDateTime) parentIntent.getSerializableExtra("startTime");
             mEndTime = (LocalDateTime) parentIntent.getSerializableExtra("endTime");
-            mSelectedDate = new LocalDate(mStartTime.getYear(), mStartTime.getMonthOfYear(), mStartTime.getDayOfMonth());
+            mSelectedDate =
+                    new LocalDate(
+                            mStartTime.getYear(), mStartTime.getMonthOfYear(),
+                            mStartTime.getDayOfMonth());
         } else {
             // Creating new event:
             //      - Set start time to selected date with current time.
             //      - Set end time to the lesser of 1 hour after start time or 11:59pm.
             LocalTime now = new LocalTime();
             mSelectedDate = (LocalDate) parentIntent.getSerializableExtra("selectedDate");
-            mStartTime = new LocalDateTime(mSelectedDate.getYear(), mSelectedDate.getMonthOfYear(), mSelectedDate.getDayOfMonth(), now.getHourOfDay(), now.getMinuteOfHour());
+            mStartTime =
+                    new LocalDateTime(
+                            mSelectedDate.getYear(),
+                            mSelectedDate.getMonthOfYear(),
+                            mSelectedDate.getDayOfMonth(),
+                            now.getHourOfDay(),
+                            now.getMinuteOfHour());
             mEndTime = mStartTime.plusHours(1);
 
             if (!isValidTimeRange()) {
-                mEndTime = new LocalDateTime(mSelectedDate.getYear(), mSelectedDate.getMonthOfYear(), mSelectedDate.getDayOfMonth(), 23, 59);
+                mEndTime =
+                        new LocalDateTime(
+                                mSelectedDate.getYear(),
+                                mSelectedDate.getMonthOfYear(),
+                                mSelectedDate.getDayOfMonth(),
+                                23,
+                                59);
             }
         }
 
@@ -181,7 +236,8 @@ public class EventActivity extends AppCompatActivity {
     }
 
     private void hideKeyboard(View view) {
-        InputMethodManager imm = (InputMethodManager) getSystemService(Context.INPUT_METHOD_SERVICE);
+        InputMethodManager imm = (InputMethodManager) getSystemService(
+                Context.INPUT_METHOD_SERVICE);
         if (imm != null) {
             imm.hideSoftInputFromWindow(view.getWindowToken(), 0);
         }
@@ -196,7 +252,8 @@ public class EventActivity extends AppCompatActivity {
 
     private boolean isValidTimeRange() {
         // Ensure 1-day event and end time is >= start time
-        return mStartTime.toLocalDate().isEqual(mEndTime.toLocalDate()) && !mEndTime.isBefore(mStartTime);
+        return mStartTime.toLocalDate().isEqual(mEndTime.toLocalDate())
+                && !mEndTime.isBefore(mStartTime);
     }
 
     // Close activity instead of up navigating

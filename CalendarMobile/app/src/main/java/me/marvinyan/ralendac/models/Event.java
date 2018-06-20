@@ -3,12 +3,13 @@ package me.marvinyan.ralendac.models;
 import org.joda.time.LocalDateTime;
 
 public class Event {
+
     private int id;
     private String description;
     private LocalDateTime startTime;
     private LocalDateTime endTime;
 
-    public Event(int id, String description, LocalDateTime startTime, LocalDateTime endTime)  {
+    public Event(int id, String description, LocalDateTime startTime, LocalDateTime endTime) {
         this.id = id;
         this.description = description;
         this.startTime = startTime;
@@ -41,5 +42,18 @@ public class Event {
 
     public void setEndTime(LocalDateTime endTime) {
         this.endTime = endTime;
+    }
+
+    @Override
+    public String toString() {
+        return "Event "
+                + id
+                + ": "
+                + description
+                + " ("
+                + getStartTime().toString()
+                + " - "
+                + getEndTime().toString()
+                + ")";
     }
 }

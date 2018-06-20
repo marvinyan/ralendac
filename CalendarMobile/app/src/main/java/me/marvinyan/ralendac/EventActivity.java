@@ -6,7 +6,6 @@ import android.content.Intent;
 import android.os.Bundle;
 import android.support.v7.app.ActionBar;
 import android.support.v7.app.AppCompatActivity;
-import android.util.Log;
 import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
@@ -83,21 +82,28 @@ public class EventActivity extends AppCompatActivity {
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
         mDescriptionEditText.clearFocus();
-        if (item.getItemId() == R.id.action_save) {
-            String description = mDescriptionEditText.getText().toString().trim();
 
-            if (description.equals("")) {
-                Toast.makeText(EventActivity.this, "Please fill in a description",
-                        Toast.LENGTH_LONG)
-                        .show();
-            } else {
-                if (mEventId == -1) {
-                    createEvent();
+        switch (item.getItemId()) {
+            case R.id.action_save:
+                String description = mDescriptionEditText.getText().toString().trim();
+
+                if (description.equals("")) {
+                    Toast.makeText(EventActivity.this, "Please fill in a description",
+                            Toast.LENGTH_LONG)
+                            .show();
                 } else {
-                    editEvent(mEventId);
+                    if (mEventId == -1) {
+                        createEvent();
+                    } else {
+                        editEvent();
+                    }
                 }
-            }
+                break;
+            case R.id.action_delete:
+                deleteEvent();
+                break;
         }
+
         return super.onOptionsItemSelected(item);
     }
 
@@ -266,17 +272,26 @@ public class EventActivity extends AppCompatActivity {
 
     private void createEvent() {
         String eventsUrlStr = NetworkUtils.buildEventUrl(null).toString();
-        Map<String, String> params = new HashMap<>();
-        params.put("event[description]", mDescriptionEditText.getText().toString());
-        params.put("event[start_time]", mStartTime.toDateTime(DateTimeZone.UTC).toString());
-        params.put("event[end_time]", mEndTime.toDateTime(DateTimeZone.UTC).toString());
+        sendVolleyRequest(Method.POST, eventsUrlStr);
+    }
 
-        Log.wtf("createevent", mStartTime.toDateTime(DateTimeZone.UTC).toString());
+    private void editEvent() {
+        String eventsUrlStr = NetworkUtils.buildEventUrl(String.valueOf(mEventId)).toString();
+        sendVolleyRequest(Method.PUT, eventsUrlStr);
+    }
+
+    private void deleteEvent() {
+        String eventsUrlStr = NetworkUtils.buildEventUrl(String.valueOf(mEventId)).toString();
+        sendVolleyRequest(Method.DELETE, eventsUrlStr);
+    }
+
+    private void sendVolleyRequest(final int method, String urlStr) {
+        Map<String, String> params = makeParamsMap();
 
         VolleyUtils.requestWithParams(
                 EventActivity.this,
-                eventsUrlStr,
-                Method.POST,
+                urlStr,
+                method,
                 params,
                 new VolleyResponseListener() {
                     @Override
@@ -288,42 +303,32 @@ public class EventActivity extends AppCompatActivity {
 
                     @Override
                     public void onResponse(Object response) {
-                        Toast.makeText(EventActivity.this, "Event was created successfully",
-                                Toast.LENGTH_LONG)
-                                .show();
+                        String toastMsg = "";
+                        switch (method) {
+                            case Method.POST:
+                                toastMsg = "Event was created successfully";
+                                break;
+                            case Method.PUT:
+                                toastMsg = "Event was updated successfully";
+                                break;
+                            case Method.DELETE:
+                                toastMsg = "Event was deleted successfully";
+                                break;
+                        }
+
+                        Toast.makeText(EventActivity.this, toastMsg, Toast.LENGTH_LONG).show();
                         finish();
                     }
                 });
     }
 
-    // TODO: Make this DRYer somehow?
-    private void editEvent(int eventId) {
-        String eventsUrlStr = NetworkUtils.buildEventUrl(Integer.toString(eventId)).toString();
+    private Map<String, String> makeParamsMap() {
         Map<String, String> params = new HashMap<>();
+
         params.put("event[description]", mDescriptionEditText.getText().toString());
         params.put("event[start_time]", mStartTime.toDateTime(DateTimeZone.UTC).toString());
         params.put("event[end_time]", mEndTime.toDateTime(DateTimeZone.UTC).toString());
 
-        VolleyUtils.requestWithParams(
-                EventActivity.this,
-                eventsUrlStr,
-                Method.PUT,
-                params,
-                new VolleyResponseListener() {
-                    @Override
-                    public void onError(String message) {
-                        Toast.makeText(EventActivity.this, "Status code: " + message,
-                                Toast.LENGTH_LONG)
-                                .show();
-                    }
-
-                    @Override
-                    public void onResponse(Object response) {
-                        Toast.makeText(EventActivity.this, "Event was updated successfully",
-                                Toast.LENGTH_LONG)
-                                .show();
-                        finish();
-                    }
-                });
+        return params;
     }
 }

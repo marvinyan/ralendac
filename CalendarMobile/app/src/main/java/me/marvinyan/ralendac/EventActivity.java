@@ -16,6 +16,7 @@ import android.widget.EditText;
 import android.widget.TextView;
 import android.widget.TimePicker;
 import android.widget.Toast;
+import com.android.volley.Request.Method;
 import java.util.HashMap;
 import java.util.Map;
 import me.marvinyan.ralendac.utilities.NetworkUtils;
@@ -272,9 +273,10 @@ public class EventActivity extends AppCompatActivity {
 
         Log.wtf("createevent", mStartTime.toDateTime(DateTimeZone.UTC).toString());
 
-        VolleyUtils.post(
+        VolleyUtils.requestWithParams(
                 EventActivity.this,
                 eventsUrlStr,
+                Method.POST,
                 params,
                 new VolleyResponseListener() {
                     @Override
@@ -302,9 +304,10 @@ public class EventActivity extends AppCompatActivity {
         params.put("event[start_time]", mStartTime.toDateTime(DateTimeZone.UTC).toString());
         params.put("event[end_time]", mEndTime.toDateTime(DateTimeZone.UTC).toString());
 
-        VolleyUtils.put(
+        VolleyUtils.requestWithParams(
                 EventActivity.this,
                 eventsUrlStr,
+                Method.PUT,
                 params,
                 new VolleyResponseListener() {
                     @Override

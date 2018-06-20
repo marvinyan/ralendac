@@ -2,7 +2,6 @@ package me.marvinyan.ralendac.utilities;
 
 import android.content.Context;
 import com.android.volley.AuthFailureError;
-import com.android.volley.Request;
 import com.android.volley.Response;
 import com.android.volley.VolleyError;
 import com.android.volley.toolbox.JsonObjectRequest;
@@ -19,10 +18,14 @@ import org.json.JSONObject;
  */
 public class VolleyUtils {
 
-    public static void get(Context context, String urlStr, final VolleyResponseListener listener) {
+    public static void requestWithoutParams(
+            Context context,
+            String urlStr,
+            int method,
+            final VolleyResponseListener listener) {
         JsonObjectRequest getRequest =
                 new JsonObjectRequest(
-                        Request.Method.GET,
+                        method,
                         urlStr,
                         null,
                         new Response.Listener<JSONObject>() {
@@ -34,21 +37,22 @@ public class VolleyUtils {
                         new Response.ErrorListener() {
                             @Override
                             public void onErrorResponse(VolleyError error) {
-                                listener.onError(error.toString());
+                                listener.onError(String.valueOf(error.networkResponse.statusCode));
                             }
                         });
 
         VolleySingleton.getInstance(context).addToRequestQueue(getRequest);
     }
 
-    public static void post(
+    public static void requestWithParams(
             Context context,
             String urlStr,
+            int method,
             final Map<String, String> params,
             final VolleyResponseListener listener) {
         StringRequest stringRequest =
                 new StringRequest(
-                        Request.Method.POST,
+                        method,
                         urlStr,
                         new Response.Listener<String>() {
                             @Override
@@ -69,44 +73,7 @@ public class VolleyUtils {
 
                     @Override
                     public Map<String, String> getHeaders() throws AuthFailureError {
-                        Map<String, String>  headers = new HashMap<String, String>();
-                        headers.put("Content-Type", "application/x-www-form-urlencoded");
-                        return headers;
-                    }
-                };
-
-        VolleySingleton.getInstance(context).addToRequestQueue(stringRequest);
-    }
-
-    public static void put(
-            Context context,
-            String urlStr,
-            final Map<String, String> params,
-            final VolleyResponseListener listener) {
-        StringRequest stringRequest =
-                new StringRequest(
-                        Request.Method.PUT,
-                        urlStr,
-                        new Response.Listener<String>() {
-                            @Override
-                            public void onResponse(String response) {
-                                listener.onResponse(response);
-                            }
-                        },
-                        new Response.ErrorListener() {
-                            @Override
-                            public void onErrorResponse(VolleyError error) {
-                                listener.onError(String.valueOf(error.networkResponse.statusCode));
-                            }
-                        }) {
-                    @Override
-                    public Map<String, String> getParams() {
-                        return params;
-                    }
-
-                    @Override
-                    public Map<String, String> getHeaders() throws AuthFailureError {
-                        Map<String, String>  headers = new HashMap<String, String>();
+                        Map<String, String> headers = new HashMap<String, String>();
                         headers.put("Content-Type", "application/x-www-form-urlencoded");
                         return headers;
                     }

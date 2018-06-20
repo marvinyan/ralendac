@@ -1,6 +1,7 @@
 package me.marvinyan.ralendac.utilities;
 
 import org.joda.time.DateTime;
+import org.joda.time.DateTimeZone;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -22,10 +23,12 @@ public class JsonUtils {
 
     public static Event parse(JSONObject jsonObject) throws JSONException {
         int id = jsonObject.getInt("id");
-        DateTime startTime = new DateTime(jsonObject.getString("start_time"));
-        DateTime endTime = new DateTime(jsonObject.getString("end_time"));
+        DateTime utcStartTime = new DateTime(jsonObject.getString("start_time"));
+        DateTime utcEndTime = new DateTime(jsonObject.getString("end_time"));
         String description = jsonObject.getString("description");
 
-        return new Event(id, description, startTime.toLocalDateTime(), endTime.toLocalDateTime());
+        DateTime localStartTime = utcStartTime.withZone(DateTimeZone.getDefault());
+        DateTime localEndTime = utcEndTime.withZone(DateTimeZone.getDefault());
+        return new Event(id, description, localStartTime, localEndTime);
     }
 }

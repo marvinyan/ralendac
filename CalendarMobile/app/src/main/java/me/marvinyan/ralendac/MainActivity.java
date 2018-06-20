@@ -6,17 +6,14 @@ import android.support.v4.widget.SwipeRefreshLayout;
 import android.support.v7.app.AppCompatActivity;
 import android.view.View;
 import android.widget.TextView;
-
-import org.joda.time.LocalDate;
-import org.joda.time.LocalDateTime;
-import org.json.JSONException;
-import org.json.JSONObject;
-
 import me.marvinyan.ralendac.models.Event;
 import me.marvinyan.ralendac.utilities.JsonUtils;
 import me.marvinyan.ralendac.utilities.NetworkUtils;
 import me.marvinyan.ralendac.utilities.VolleyResponseListener;
 import me.marvinyan.ralendac.utilities.VolleyUtils;
+import org.joda.time.LocalDate;
+import org.json.JSONException;
+import org.json.JSONObject;
 
 public class MainActivity extends AppCompatActivity {
 
@@ -55,10 +52,7 @@ public class MainActivity extends AppCompatActivity {
     public void showEditEventActivity(View view) {
         Intent eventActivityIntent = new Intent(MainActivity.this, EventActivity.class);
 
-        // Simulate extracting from selected event
-        LocalDateTime startTime = new LocalDateTime(2018, 6, 19, 8, 15);
-        LocalDateTime endTime = new LocalDateTime(2018, 6, 19, 12, 30);
-        Event selectedEvent = new Event(5, "Test description", startTime, endTime);
+        Event selectedEvent = allEvents[allEvents.length - 1];
 
         eventActivityIntent.putExtra("eventId", selectedEvent.getId());
         eventActivityIntent.putExtra("description", selectedEvent.getDescription());
@@ -83,7 +77,7 @@ public class MainActivity extends AppCompatActivity {
                     @Override
                     public void onResponse(Object response) {
                         try {
-                            Event[] allEvents = JsonUtils.getEventsFromJson((JSONObject) response);
+                            allEvents = JsonUtils.getEventsFromJson((JSONObject) response);
                             StringBuilder builder = new StringBuilder();
 
                             for (Event event : allEvents) {

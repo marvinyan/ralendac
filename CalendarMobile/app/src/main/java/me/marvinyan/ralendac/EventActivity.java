@@ -6,6 +6,7 @@ import android.content.Intent;
 import android.os.Bundle;
 import android.support.v7.app.ActionBar;
 import android.support.v7.app.AppCompatActivity;
+import android.util.Log;
 import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
@@ -15,14 +16,17 @@ import android.widget.EditText;
 import android.widget.TextView;
 import android.widget.TimePicker;
 import android.widget.Toast;
-
+import java.util.HashMap;
+import java.util.Map;
+import me.marvinyan.ralendac.utilities.NetworkUtils;
+import me.marvinyan.ralendac.utilities.VolleyResponseListener;
+import me.marvinyan.ralendac.utilities.VolleyUtils;
+import org.joda.time.DateTime;
+import org.joda.time.DateTimeZone;
 import org.joda.time.LocalDate;
-import org.joda.time.LocalDateTime;
 import org.joda.time.LocalTime;
 import org.joda.time.format.DateTimeFormat;
 import org.joda.time.format.DateTimeFormatter;
-
-import me.marvinyan.ralendac.models.Event;
 
 public class EventActivity extends AppCompatActivity {
 
@@ -31,8 +35,8 @@ public class EventActivity extends AppCompatActivity {
     private TextView mEndTimeTextView;
 
     private LocalDate mSelectedDate;
-    private LocalDateTime mStartTime;
-    private LocalDateTime mEndTime;
+    private DateTime mStartTime;
+    private DateTime mEndTime;
     private int mEventId;
 
     @Override
@@ -86,14 +90,10 @@ public class EventActivity extends AppCompatActivity {
                         Toast.LENGTH_LONG)
                         .show();
             } else {
-                Event event =
-                        new Event(mEventId, mDescriptionEditText.getText().toString(), mStartTime,
-                                mEndTime);
-
                 if (mEventId == -1) {
-
+                    createEvent();
                 } else {
-
+                    editEvent(mEventId);
                 }
             }
         }
@@ -123,7 +123,7 @@ public class EventActivity extends AppCompatActivity {
                                 @Override
                                 public void onTimeSet(TimePicker timePicker, int hour, int minute) {
                                     mStartTime =
-                                            new LocalDateTime(
+                                            new DateTime(
                                                     mSelectedDate.getYear(),
                                                     mSelectedDate.getMonthOfYear(),
                                                     mSelectedDate.getDayOfMonth(),
@@ -155,7 +155,7 @@ public class EventActivity extends AppCompatActivity {
                                 @Override
                                 public void onTimeSet(TimePicker timePicker, int hour, int minute) {
                                     mEndTime =
-                                            new LocalDateTime(
+                                            new DateTime(
                                                     mSelectedDate.getYear(),
                                                     mSelectedDate.getMonthOfYear(),
                                                     mSelectedDate.getDayOfMonth(),
@@ -200,8 +200,8 @@ public class EventActivity extends AppCompatActivity {
 
         if (parentIntent.hasExtra("eventId")) {
             mDescriptionEditText.setText(parentIntent.getStringExtra("description"));
-            mStartTime = (LocalDateTime) parentIntent.getSerializableExtra("startTime");
-            mEndTime = (LocalDateTime) parentIntent.getSerializableExtra("endTime");
+            mStartTime = (DateTime) parentIntent.getSerializableExtra("startTime");
+            mEndTime = (DateTime) parentIntent.getSerializableExtra("endTime");
             mSelectedDate =
                     new LocalDate(
                             mStartTime.getYear(), mStartTime.getMonthOfYear(),
@@ -213,7 +213,7 @@ public class EventActivity extends AppCompatActivity {
             LocalTime now = new LocalTime();
             mSelectedDate = (LocalDate) parentIntent.getSerializableExtra("selectedDate");
             mStartTime =
-                    new LocalDateTime(
+                    new DateTime(
                             mSelectedDate.getYear(),
                             mSelectedDate.getMonthOfYear(),
                             mSelectedDate.getDayOfMonth(),
@@ -223,7 +223,7 @@ public class EventActivity extends AppCompatActivity {
 
             if (!isValidTimeRange()) {
                 mEndTime =
-                        new LocalDateTime(
+                        new DateTime(
                                 mSelectedDate.getYear(),
                                 mSelectedDate.getMonthOfYear(),
                                 mSelectedDate.getDayOfMonth(),
@@ -261,5 +261,66 @@ public class EventActivity extends AppCompatActivity {
     public boolean onSupportNavigateUp() {
         finish();
         return false;
+    }
+
+    private void createEvent() {
+        String eventsUrlStr = NetworkUtils.buildEventUrl(null).toString();
+        Map<String, String> params = new HashMap<>();
+        params.put("event[description]", mDescriptionEditText.getText().toString());
+        params.put("event[start_time]", mStartTime.toDateTime(DateTimeZone.UTC).toString());
+        params.put("event[end_time]", mEndTime.toDateTime(DateTimeZone.UTC).toString());
+
+        Log.wtf("createevent", mStartTime.toDateTime(DateTimeZone.UTC).toString());
+
+        VolleyUtils.post(
+                EventActivity.this,
+                eventsUrlStr,
+                params,
+                new VolleyResponseListener() {
+                    @Override
+                    public void onError(String message) {
+                        Toast.makeText(EventActivity.this, "Status code: " + message,
+                                Toast.LENGTH_LONG)
+                                .show();
+                    }
+
+                    @Override
+                    public void onResponse(Object response) {
+                        Toast.makeText(EventActivity.this, "Event was created successfully",
+                                Toast.LENGTH_LONG)
+                                .show();
+                        finish();
+                    }
+                });
+    }
+
+    // TODO: Make this DRYer somehow?
+    private void editEvent(int eventId) {
+        String eventsUrlStr = NetworkUtils.buildEventUrl(Integer.toString(eventId)).toString();
+        Map<String, String> params = new HashMap<>();
+        params.put("event[description]", mDescriptionEditText.getText().toString());
+        params.put("event[start_time]", mStartTime.toDateTime(DateTimeZone.UTC).toString());
+        params.put("event[end_time]", mEndTime.toDateTime(DateTimeZone.UTC).toString());
+
+        VolleyUtils.put(
+                EventActivity.this,
+                eventsUrlStr,
+                params,
+                new VolleyResponseListener() {
+                    @Override
+                    public void onError(String message) {
+                        Toast.makeText(EventActivity.this, "Status code: " + message,
+                                Toast.LENGTH_LONG)
+                                .show();
+                    }
+
+                    @Override
+                    public void onResponse(Object response) {
+                        Toast.makeText(EventActivity.this, "Event was updated successfully",
+                                Toast.LENGTH_LONG)
+                                .show();
+                        finish();
+                    }
+                });
     }
 }

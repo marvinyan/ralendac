@@ -1,15 +1,15 @@
 package me.marvinyan.ralendac.models;
 
-import org.joda.time.LocalDateTime;
+import org.joda.time.DateTime;
 
 public class Event {
 
     private int id;
     private String description;
-    private LocalDateTime startTime;
-    private LocalDateTime endTime;
+    private DateTime startTime;
+    private DateTime endTime;
 
-    public Event(int id, String description, LocalDateTime startTime, LocalDateTime endTime) {
+    public Event(int id, String description, DateTime startTime, DateTime endTime) {
         this.id = id;
         this.description = description;
         this.startTime = startTime;
@@ -28,19 +28,19 @@ public class Event {
         this.description = description;
     }
 
-    public LocalDateTime getStartTime() {
+    public DateTime getStartTime() {
         return startTime;
     }
 
-    public void setStartTime(LocalDateTime startTime) {
+    public void setStartTime(DateTime startTime) {
         this.startTime = startTime;
     }
 
-    public LocalDateTime getEndTime() {
+    public DateTime getEndTime() {
         return endTime;
     }
 
-    public void setEndTime(LocalDateTime endTime) {
+    public void setEndTime(DateTime endTime) {
         this.endTime = endTime;
     }
 

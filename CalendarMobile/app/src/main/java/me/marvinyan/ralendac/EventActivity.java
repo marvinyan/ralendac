@@ -1,5 +1,6 @@
 package me.marvinyan.ralendac;
 
+import android.app.Activity;
 import android.app.TimePickerDialog;
 import android.content.Context;
 import android.content.Intent;
@@ -266,6 +267,8 @@ public class EventActivity extends AppCompatActivity {
     // Close activity instead of up navigating
     @Override
     public boolean onSupportNavigateUp() {
+        Intent resultIntent = new Intent();
+        setResult(Activity.RESULT_CANCELED, resultIntent);
         finish();
         return false;
     }
@@ -317,6 +320,8 @@ public class EventActivity extends AppCompatActivity {
                         }
 
                         Toast.makeText(EventActivity.this, toastMsg, Toast.LENGTH_LONG).show();
+                        Intent resultIntent = new Intent();
+                        setResult(Activity.RESULT_OK, resultIntent);
                         finish();
                     }
                 });

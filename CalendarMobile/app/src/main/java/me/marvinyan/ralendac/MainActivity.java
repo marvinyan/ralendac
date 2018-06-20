@@ -1,7 +1,9 @@
 package me.marvinyan.ralendac;
 
+import android.app.Activity;
 import android.content.Intent;
 import android.os.Bundle;
+import android.support.annotation.Nullable;
 import android.support.v4.widget.SwipeRefreshLayout;
 import android.support.v7.app.AppCompatActivity;
 import android.view.View;
@@ -17,6 +19,8 @@ import org.json.JSONException;
 import org.json.JSONObject;
 
 public class MainActivity extends AppCompatActivity {
+
+    public static final int EVENT_REQUEST_CODE = 1;
 
     private SwipeRefreshLayout swipeLayout;
     private TextView mLogTextView;
@@ -41,13 +45,22 @@ public class MainActivity extends AppCompatActivity {
         getEvents();
     }
 
+    @Override
+    protected void onActivityResult(int requestCode, int resultCode, @Nullable Intent data) {
+        super.onActivityResult(requestCode, resultCode, data);
+        // Refetch events if an event was created, edited, or deleted.
+        if (requestCode == EVENT_REQUEST_CODE && resultCode == Activity.RESULT_OK) {
+            getEvents();
+        }
+    }
+
     public void showNewEventActivity(View view) {
         Intent eventActivityIntent = new Intent(MainActivity.this, EventActivity.class);
 
         LocalDate newEventTime = new LocalDate(2018, 6, 19);
         eventActivityIntent.putExtra("selectedDate", newEventTime);
 
-        startActivity(eventActivityIntent);
+        startActivityForResult(eventActivityIntent, EVENT_REQUEST_CODE);
     }
 
     public void showEditEventActivity(View view) {
@@ -60,7 +73,7 @@ public class MainActivity extends AppCompatActivity {
         eventActivityIntent.putExtra("startTime", selectedEvent.getStartTime());
         eventActivityIntent.putExtra("endTime", selectedEvent.getEndTime());
 
-        startActivity(eventActivityIntent);
+        startActivityForResult(eventActivityIntent, EVENT_REQUEST_CODE);
     }
 
     private void getEvents() {

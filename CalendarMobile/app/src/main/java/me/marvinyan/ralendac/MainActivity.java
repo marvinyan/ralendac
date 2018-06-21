@@ -4,9 +4,12 @@ import android.app.Activity;
 import android.content.Intent;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
+import android.support.v4.content.ContextCompat;
 import android.support.v4.widget.SwipeRefreshLayout;
 import android.support.v7.app.AppCompatActivity;
 import android.view.View;
+import android.widget.LinearLayout;
+import android.widget.LinearLayout.LayoutParams;
 import android.widget.TextView;
 import com.android.volley.Request.Method;
 import java.util.List;
@@ -32,7 +35,7 @@ public class MainActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
-        mLogTextView = findViewById(R.id.tv_json_log);
+//        mLogTextView = findViewById(R.id.tv_json_log);
 
         swipeLayout = findViewById(R.id.swipeLayout);
         swipeLayout.setOnRefreshListener(
@@ -44,6 +47,7 @@ public class MainActivity extends AppCompatActivity {
                 });
 
         getEvents();
+        buildCalendar();
     }
 
     @Override
@@ -56,7 +60,7 @@ public class MainActivity extends AppCompatActivity {
         }
     }
 
-    public void showNewEventActivity(View view) {
+    public void startNewEventActivity(View view) {
         Intent eventActivityIntent = new Intent(MainActivity.this, EventActivity.class);
 
         LocalDate newEventTime = new LocalDate(2018, 6, 19);
@@ -65,7 +69,7 @@ public class MainActivity extends AppCompatActivity {
         startActivityForResult(eventActivityIntent, EVENT_REQUEST_CODE);
     }
 
-    public void showEditEventActivity(View view) {
+    public void startEditEventActivity(View view) {
         Intent eventActivityIntent = new Intent(MainActivity.this, EventActivity.class);
 
         Event selectedEvent = allEvents.get(allEvents.size() - 1);
@@ -87,7 +91,7 @@ public class MainActivity extends AppCompatActivity {
                 new VolleyResponseListener() {
                     @Override
                     public void onError(String message) {
-                        mLogTextView.setText(message);
+//                        mLogTextView.setText(message);
                         swipeLayout.setRefreshing(false);
                     }
 
@@ -101,12 +105,31 @@ public class MainActivity extends AppCompatActivity {
                                 builder.append(event.toString() + "\n");
                             }
 
-                            mLogTextView.setText(builder.toString());
+//                            mLogTextView.setText(builder.toString());
                         } catch (JSONException e) {
                             e.printStackTrace();
                         }
                         swipeLayout.setRefreshing(false);
                     }
                 });
+    }
+
+    private void buildCalendar() {
+        LinearLayout[] weeks = new LinearLayout[5];
+        LinearLayout weeksContainer = findViewById(R.id.layout_calendar_weeks);
+        for (int i = 0; i < 5; i++) {
+            LinearLayout week = new LinearLayout(MainActivity.this);
+            LinearLayout.LayoutParams params = new LinearLayout.LayoutParams(
+                    LayoutParams.MATCH_PARENT,
+                    0,
+                    1f
+            );
+            week.setLayoutParams(params);
+            week.setBackgroundDrawable(
+                    ContextCompat.getDrawable(MainActivity.this, R.drawable.border_bottom_gray));
+
+            weeks[i] = week;
+            weeksContainer.addView(week);
+        }
     }
 }

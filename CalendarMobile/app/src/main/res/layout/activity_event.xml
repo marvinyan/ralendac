@@ -4,6 +4,7 @@
     android:id="@+id/layout_event"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
+    android:layout_margin="15dp"
     android:clickable="true"
     android:focusable="true"
     android:focusableInTouchMode="true"
@@ -17,34 +18,34 @@
         android:layout_height="wrap_content"
         android:layout_gravity="center_horizontal"
         android:gravity="center"
-        android:hint="Description"
+        android:hint="@string/hint_event_description"
         android:inputType="text"
-        android:textSize="30sp" />
+        android:textSize="25sp"/>
 
     <TextView
         android:id="@+id/tv_start_time"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_gravity="center_horizontal"
         android:layout_marginTop="15dp"
+        android:layout_gravity="center_horizontal"
         android:clickable="true"
         android:focusable="true"
         android:gravity="center"
-        android:hint="Start Time"
+        android:hint="@string/hint_event_start_time"
         android:onClick="displayTimePickerDialog"
-        android:textSize="30sp" />
+        android:textSize="25sp"/>
 
     <TextView
         android:id="@+id/tv_end_time"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_gravity="center_horizontal"
         android:layout_marginTop="15dp"
+        android:layout_gravity="center_horizontal"
         android:clickable="true"
         android:focusable="true"
         android:gravity="center"
-        android:hint="End Time"
+        android:hint="@string/hint_event_end_time"
         android:onClick="displayTimePickerDialog"
-        android:textSize="30sp" />
+        android:textSize="25sp"/>
 
 </LinearLayout>

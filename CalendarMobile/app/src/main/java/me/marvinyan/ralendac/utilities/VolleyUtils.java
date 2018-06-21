@@ -1,12 +1,10 @@
 package me.marvinyan.ralendac.utilities;
 
 import android.content.Context;
-import com.android.volley.AuthFailureError;
 import com.android.volley.Response;
 import com.android.volley.VolleyError;
 import com.android.volley.toolbox.JsonObjectRequest;
 import com.android.volley.toolbox.StringRequest;
-import java.util.HashMap;
 import java.util.Map;
 import org.json.JSONObject;
 
@@ -69,13 +67,6 @@ public class VolleyUtils {
                     @Override
                     public Map<String, String> getParams() {
                         return params;
-                    }
-
-                    @Override
-                    public Map<String, String> getHeaders() throws AuthFailureError {
-                        Map<String, String> headers = new HashMap<String, String>();
-                        headers.put("Content-Type", "application/x-www-form-urlencoded");
-                        return headers;
                     }
                 };
 

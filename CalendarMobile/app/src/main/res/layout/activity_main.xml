@@ -8,39 +8,94 @@
     <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:gravity="center_vertical"
+        android:gravity="top"
         android:orientation="vertical">
 
-        <Button
-            android:id="@+id/btn_new_event_activity"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_gravity="center_horizontal"
-            android:layout_marginTop="15dp"
-            android:clickable="true"
-            android:focusable="true"
-            android:onClick="showNewEventActivity"
-            android:text="New Event" />
-
-        <Button
-            android:id="@+id/btn_edit_event_activity"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_gravity="center_horizontal"
-            android:layout_marginTop="15dp"
-            android:clickable="true"
-            android:focusable="true"
-            android:onClick="showEditEventActivity"
-            android:text="Edit Event" />
-
-        <TextView
-            android:id="@+id/tv_json_log"
+        <LinearLayout
+            android:id="@+id/layout_calendar_day_header"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_gravity="center_horizontal"
-            android:layout_margin="15dp"
-            android:hint="Pull to fetch events JSON"
-            android:padding="10dp" />
+            android:weightSum="7">
+
+            <TextView
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:gravity="center_horizontal"
+                android:text="@string/day_sunday"/>
+            <TextView
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:gravity="center_horizontal"
+                android:text="@string/day_monday"/>
+            <TextView
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:gravity="center_horizontal"
+                android:text="@string/day_tuesday"/>
+            <TextView
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:gravity="center_horizontal"
+                android:text="@string/day_wednesday"/>
+            <TextView
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:gravity="center_horizontal"
+                android:text="@string/day_thursday"/>
+            <TextView
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:gravity="center_horizontal"
+                android:text="@string/day_friday"/>
+            <TextView
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:gravity="center_horizontal"
+                android:text="@string/day_saturday"/>
+        </LinearLayout>
+
+        <LinearLayout
+            android:id="@+id/layout_calendar_weeks"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:orientation="vertical"
+            android:weightSum="5">
+        </LinearLayout>
+        <!--<Button-->
+        <!--android:id="@+id/btn_new_event_activity"-->
+        <!--android:layout_width="wrap_content"-->
+        <!--android:layout_height="wrap_content"-->
+        <!--android:layout_gravity="center_horizontal"-->
+        <!--android:clickable="true"-->
+        <!--android:focusable="true"-->
+        <!--android:onClick="startNewEventActivity"-->
+        <!--android:text="New Event"/>-->
+
+        <!--<Button-->
+        <!--android:id="@+id/btn_edit_event_activity"-->
+        <!--android:layout_width="wrap_content"-->
+        <!--android:layout_height="wrap_content"-->
+        <!--android:layout_marginTop="15dp"-->
+        <!--android:layout_gravity="center_horizontal"-->
+        <!--android:clickable="true"-->
+        <!--android:focusable="true"-->
+        <!--android:onClick="startEditEventActivity"-->
+        <!--android:text="Edit Event"/>-->
+
+        <!--<TextView-->
+        <!--android:id="@+id/tv_json_log"-->
+        <!--android:layout_width="match_parent"-->
+        <!--android:layout_height="wrap_content"-->
+        <!--android:layout_margin="15dp"-->
+        <!--android:layout_gravity="center_horizontal"-->
+        <!--android:padding="10dp"/>-->
     </LinearLayout>
 
 </android.support.v4.widget.SwipeRefreshLayout>

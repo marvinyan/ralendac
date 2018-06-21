@@ -11,4 +11,7 @@
     <string name="day_thursday">T</string>
     <string name="day_friday">F</string>
     <string name="day_saturday">S</string>
+    <string name="action_delete">Delete</string>
+    <string name="action_next_month">Next</string>
+    <string name="action_prev_month">Previous</string>
 </resources>

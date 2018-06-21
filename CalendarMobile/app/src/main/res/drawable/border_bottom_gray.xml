@@ -6,9 +6,9 @@
             android:shape="rectangle">
             <!-- Set the border color of your layout here -->
             <stroke
-                android:color="#bdbdbd"
+                android:color="#dedede"
                 android:width="1dp"/>
-            <solid android:color="#bdbdbd"/>
+            <solid android:color="#dedede"/>
         </shape>
     </item>
 

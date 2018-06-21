@@ -15,50 +15,76 @@
             android:id="@+id/layout_calendar_day_header"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
+            android:paddingTop="8dp"
+            android:paddingStart="15dp"
+            android:paddingEnd="10dp"
+            android:paddingLeft="15dp"
+            android:paddingRight="10dp"
             android:weightSum="7">
 
             <TextView
+                android:textStyle="bold"
                 android:layout_width="0dp"
                 android:layout_height="wrap_content"
                 android:layout_weight="1"
-                android:gravity="center_horizontal"
-                android:text="@string/day_sunday"/>
+                android:gravity="start"
+                android:text="@string/day_sunday"
+                android:textSize="12sp"
+                />
             <TextView
+                android:textStyle="bold"
                 android:layout_width="0dp"
                 android:layout_height="wrap_content"
                 android:layout_weight="1"
-                android:gravity="center_horizontal"
-                android:text="@string/day_monday"/>
+                android:gravity="start"
+                android:text="@string/day_monday"
+                android:textSize="12sp"
+                />
             <TextView
+                android:textStyle="bold"
                 android:layout_width="0dp"
                 android:layout_height="wrap_content"
                 android:layout_weight="1"
-                android:gravity="center_horizontal"
-                android:text="@string/day_tuesday"/>
+                android:gravity="start"
+                android:text="@string/day_tuesday"
+                android:textSize="12sp"
+                />
             <TextView
+                android:textStyle="bold"
                 android:layout_width="0dp"
                 android:layout_height="wrap_content"
                 android:layout_weight="1"
-                android:gravity="center_horizontal"
-                android:text="@string/day_wednesday"/>
+                android:gravity="start"
+                android:text="@string/day_wednesday"
+                android:textSize="12sp"
+                />
             <TextView
+                android:textStyle="bold"
                 android:layout_width="0dp"
                 android:layout_height="wrap_content"
                 android:layout_weight="1"
-                android:gravity="center_horizontal"
-                android:text="@string/day_thursday"/>
+                android:gravity="start"
+                android:text="@string/day_thursday"
+                android:textSize="12sp"
+                />
             <TextView
+                android:textStyle="bold"
                 android:layout_width="0dp"
                 android:layout_height="wrap_content"
                 android:layout_weight="1"
-                android:gravity="center_horizontal"
-                android:text="@string/day_friday"/>
+                android:gravity="start"
+                android:text="@string/day_friday"
+                android:textSize="12sp"
+                />
             <TextView
+                android:textStyle="bold"
                 android:layout_width="0dp"
                 android:layout_height="wrap_content"
                 android:layout_weight="1"
-                android:gravity="center_horizontal"
-                android:text="@string/day_saturday"/>
+                android:gravity="start"
+                android:text="@string/day_saturday"
+                android:textSize="12sp"
+                />
         </LinearLayout>
 
         <LinearLayout

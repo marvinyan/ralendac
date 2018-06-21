@@ -9,6 +9,7 @@ import android.support.v7.app.AppCompatActivity;
 import android.view.View;
 import android.widget.TextView;
 import com.android.volley.Request.Method;
+import java.util.List;
 import me.marvinyan.ralendac.models.Event;
 import me.marvinyan.ralendac.utilities.JsonUtils;
 import me.marvinyan.ralendac.utilities.NetworkUtils;
@@ -24,7 +25,7 @@ public class MainActivity extends AppCompatActivity {
 
     private SwipeRefreshLayout swipeLayout;
     private TextView mLogTextView;
-    private Event[] allEvents;
+    private List<Event> allEvents;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -49,6 +50,7 @@ public class MainActivity extends AppCompatActivity {
     protected void onActivityResult(int requestCode, int resultCode, @Nullable Intent data) {
         super.onActivityResult(requestCode, resultCode, data);
         // Refetch events if an event was created, edited, or deleted.
+        // TODO: Save an API call by just updating allEvents
         if (requestCode == EVENT_REQUEST_CODE && resultCode == Activity.RESULT_OK) {
             getEvents();
         }
@@ -66,7 +68,7 @@ public class MainActivity extends AppCompatActivity {
     public void showEditEventActivity(View view) {
         Intent eventActivityIntent = new Intent(MainActivity.this, EventActivity.class);
 
-        Event selectedEvent = allEvents[allEvents.length - 1];
+        Event selectedEvent = allEvents.get(allEvents.size() - 1);
 
         eventActivityIntent.putExtra("eventId", selectedEvent.getId());
         eventActivityIntent.putExtra("description", selectedEvent.getDescription());

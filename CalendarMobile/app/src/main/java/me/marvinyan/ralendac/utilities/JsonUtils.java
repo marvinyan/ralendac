@@ -1,24 +1,25 @@
 package me.marvinyan.ralendac.utilities;
 
+import java.util.ArrayList;
+import java.util.List;
+import me.marvinyan.ralendac.models.Event;
 import org.joda.time.DateTime;
 import org.joda.time.DateTimeZone;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
-import me.marvinyan.ralendac.models.Event;
-
 public class JsonUtils {
 
-    public static Event[] getEventsFromJson(JSONObject jsonObj) throws JSONException {
+    public static List<Event> getEventsFromJson(JSONObject jsonObj) throws JSONException {
         JSONArray jsonArr = jsonObj.getJSONArray("events");
-        Event[] eventsArr = new Event[jsonArr.length()];
+        List<Event> eventsList = new ArrayList<>();
 
         for (int i = 0; i < jsonArr.length(); i++) {
-            eventsArr[i] = parse(jsonArr.getJSONObject(i));
+            eventsList.add(parse(jsonArr.getJSONObject(i)));
         }
 
-        return eventsArr;
+        return eventsList;
     }
 
     public static Event parse(JSONObject jsonObject) throws JSONException {

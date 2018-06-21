@@ -64,6 +64,15 @@ public class EventActivity extends AppCompatActivity {
         setupInitialTimes();
     }
 
+    // Close activity instead of up navigating
+    @Override
+    public boolean onSupportNavigateUp() {
+        Intent resultIntent = new Intent();
+        setResult(Activity.RESULT_CANCELED, resultIntent);
+        finish();
+        return false;
+    }
+
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
         MenuInflater menuInflater = getMenuInflater();
@@ -262,15 +271,6 @@ public class EventActivity extends AppCompatActivity {
         // Ensure 1-day event and end time is >= start time
         return mStartTime.toLocalDate().isEqual(mEndTime.toLocalDate())
                 && !mEndTime.isBefore(mStartTime);
-    }
-
-    // Close activity instead of up navigating
-    @Override
-    public boolean onSupportNavigateUp() {
-        Intent resultIntent = new Intent();
-        setResult(Activity.RESULT_CANCELED, resultIntent);
-        finish();
-        return false;
     }
 
     private void createEvent() {

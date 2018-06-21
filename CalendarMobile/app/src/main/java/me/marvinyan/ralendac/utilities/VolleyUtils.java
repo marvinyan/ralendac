@@ -14,7 +14,7 @@ import org.json.JSONObject;
  * The purpose of this class is to separate network operations from activities for better
  * maintainability.
  *
- * <p>https://stackoverflow.com/a/44470827
+ * <p>Helpful link: https://stackoverflow.com/a/44470827
  */
 public class VolleyUtils {
 

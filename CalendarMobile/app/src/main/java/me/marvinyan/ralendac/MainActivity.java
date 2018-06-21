@@ -8,8 +8,12 @@ import android.support.annotation.Nullable;
 import android.support.v4.content.ContextCompat;
 import android.support.v4.widget.SwipeRefreshLayout;
 import android.support.v7.app.AppCompatActivity;
+import android.util.Log;
 import android.util.TypedValue;
 import android.view.Gravity;
+import android.view.Menu;
+import android.view.MenuInflater;
+import android.view.MenuItem;
 import android.view.View;
 import android.widget.LinearLayout;
 import android.widget.LinearLayout.LayoutParams;
@@ -29,7 +33,7 @@ import org.json.JSONObject;
 public class MainActivity extends AppCompatActivity {
 
     private static final int EVENT_REQUEST_CODE = 1;
-    private static final int NUM_WEEKS_DISPLAYED = 5;
+    private static final int NUM_WEEKS_DISPLAYED = 6;
 
     private DateTime displayedMonth;
     private SwipeRefreshLayout swipeLayout;
@@ -52,7 +56,7 @@ public class MainActivity extends AppCompatActivity {
                     }
                 });
 
-        displayedMonth = new DateTime().plusMonths(1); // Display current month on app start
+        displayedMonth = new DateTime(); // Display current month on app start
 
         getEvents();
         buildCalendar();
@@ -67,6 +71,32 @@ public class MainActivity extends AppCompatActivity {
             getEvents();
         }
     }
+
+    @Override
+    public boolean onCreateOptionsMenu(Menu menu) {
+        MenuInflater menuInflater = getMenuInflater();
+        menuInflater.inflate(R.menu.main, menu);
+        return true;
+    }
+
+    @Override
+    public boolean onOptionsItemSelected(MenuItem item) {
+        switch (item.getItemId()) {
+            case R.id.action_prev_month:
+                displayedMonth = displayedMonth.minusMonths(1);
+                break;
+            case R.id.action_next_month:
+                displayedMonth = displayedMonth.plusMonths(1);
+                break;
+        }
+
+        LinearLayout weeksContainer = findViewById(R.id.layout_calendar_weeks);
+        weeksContainer.removeAllViews();
+        buildCalendar();
+
+        return super.onOptionsItemSelected(item);
+    }
+
 
     public void startNewEventActivity(View view) {
         Intent eventActivityIntent = new Intent(MainActivity.this, EventActivity.class);
@@ -123,6 +153,7 @@ public class MainActivity extends AppCompatActivity {
     }
 
     private void buildCalendar() {
+        setTitle(displayedMonth.monthOfYear().getAsText() + " " + displayedMonth.year().getAsText());
         LinearLayout[] weeks = new LinearLayout[NUM_WEEKS_DISPLAYED];
         LinearLayout weeksContainer = findViewById(R.id.layout_calendar_weeks);
 
@@ -179,11 +210,17 @@ public class MainActivity extends AppCompatActivity {
         }
 
         // Populate next month's dates if space available
-        LinearLayout finalWeek = weeks[NUM_WEEKS_DISPLAYED - 1];
-        for (int i = 1; finalWeek.getChildCount() < 7; i++) {
-            TextView dtv = createDateTextView(i);
-            dtv.setTextColor(Color.GRAY);
-            finalWeek.addView(dtv);
+        int nextMonthCurDate = 1;
+        for (int week = curWeekRow; week < NUM_WEEKS_DISPLAYED;) {
+            LinearLayout finalWeek = weeks[week];
+            if (finalWeek.getChildCount() == 7) {
+                week++;
+            } else {
+                TextView dtv = createDateTextView(nextMonthCurDate);
+                dtv.setTextColor(Color.GRAY);
+                finalWeek.addView(dtv);
+                nextMonthCurDate++;
+            }
         }
     }
 

@@ -16,6 +16,7 @@ import org.json.JSONObject;
  */
 public class VolleyUtils {
 
+    // TODO: This is only relevant for GET requests
     public static void requestWithoutParams(
             Context context,
             String urlStr,

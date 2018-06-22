@@ -1,9 +1,15 @@
 <resources>
     <string name="app_name">Ralendac</string>
+
     <string name="action_save">Save</string>
+    <string name="action_delete">Delete</string>
+    <string name="action_next_month">Next Month</string>
+    <string name="action_prev_month">Previous Month</string>
+
     <string name="hint_event_description">Description</string>
     <string name="hint_event_start_time">Start Time</string>
     <string name="hint_event_end_time">End Time</string>
+
     <string name="day_sunday">S</string>
     <string name="day_monday">M</string>
     <string name="day_tuesday">T</string>
@@ -11,7 +17,4 @@
     <string name="day_thursday">T</string>
     <string name="day_friday">F</string>
     <string name="day_saturday">S</string>
-    <string name="action_delete">Delete</string>
-    <string name="action_next_month">Next</string>
-    <string name="action_prev_month">Previous</string>
 </resources>

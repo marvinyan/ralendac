@@ -184,34 +184,25 @@ public class MainActivity extends AppCompatActivity {
         int curMonthTotalDays = displayedMonth.dayOfMonth().getMaximumValue();
         int firstDayOfCurMonth = displayedMonth.withDayOfMonth(1).dayOfWeek().get();
 
+        DateTime prevMonth = displayedMonth.minusMonths(1);
         if (firstDayOfCurMonth != 7) {
             for (int i = firstDayOfCurMonth - 1; i >= 0; i--) {
-                TextView dtv = createDateTextView(prevMonthTotalDays - i);
-                dtv.setTextColor(Color.GRAY);
-                weeks[0].addView(dtv);
+                LinearLayout dateBox = createDateBoxView(prevMonth.withDayOfMonth(prevMonthTotalDays - i));
+                weeks[0].addView(dateBox);
             }
         }
 
         // Populate dates of current month
         int curWeekRow = 0;
         int curDayOfWeek = firstDayOfCurMonth;
-        for (int i = 1; i <= curMonthTotalDays; i++) {
-            if (i != 1 && curDayOfWeek > 6) {
+        for (int date = 1; date <= curMonthTotalDays; date++) {
+            // Edge case where the first day of the month is a Sunday
+            if (date != 1 && curDayOfWeek > 6) {
                 curWeekRow++;
             }
 
-            TextView dtv = createDateTextView(i);
-
-            // Highlight today's date
-            if (displayedMonth.withDayOfMonth(i).equals(today)) {
-                dtv.setTextColor(getResources().getColor(R.color.colorDateHighlight));
-                dtv.setTypeface(null, Typeface.BOLD);
-                dtv.setPaintFlags(dtv.getPaintFlags() | Paint.UNDERLINE_TEXT_FLAG);
-            } else {
-                dtv.setTextColor(Color.BLACK);
-            }
-
-            weeks[curWeekRow].addView(dtv);
+            LinearLayout dateBox = createDateBoxView(displayedMonth.withDayOfMonth(date));
+            weeks[curWeekRow].addView(dateBox);
 
             curDayOfWeek++;
             if (curDayOfWeek == 8) {
@@ -220,29 +211,56 @@ public class MainActivity extends AppCompatActivity {
         }
 
         // Populate next month's starting dates if space available
-        int nextMonthCurDate = 1;
+        DateTime nextMonth = displayedMonth.plusMonths(1).withDayOfMonth(1);
+
         for (int week = curWeekRow; week < NUM_WEEKS_DISPLAYED;) {
             LinearLayout finalWeek = weeks[week];
             if (finalWeek.getChildCount() == 7) {
                 week++;
             } else {
-                TextView dtv = createDateTextView(nextMonthCurDate);
-                dtv.setTextColor(Color.GRAY);
-                finalWeek.addView(dtv);
-                nextMonthCurDate++;
+                finalWeek.addView(createDateBoxView(nextMonth));
+                nextMonth = nextMonth.plusDays(1);
             }
         }
     }
 
-    private TextView createDateTextView(int date) {
-        TextView dateTextView = new TextView(MainActivity.this);
-        LinearLayout.LayoutParams params = new LinearLayout.LayoutParams(0, LayoutParams.MATCH_PARENT, 1f);
+    private TextView createDateTextView(DateTime date) {
+        TextView dtv = new TextView(MainActivity.this);
+        LinearLayout.LayoutParams params = new LinearLayout.LayoutParams(LayoutParams.WRAP_CONTENT, LayoutParams.WRAP_CONTENT);
 
-        dateTextView.setTextSize(TypedValue.COMPLEX_UNIT_SP, 10);
-        dateTextView.setGravity(Gravity.START);
-        dateTextView.setText(String.valueOf(date));
-        dateTextView.setLayoutParams(params);
+        dtv.setTextSize(TypedValue.COMPLEX_UNIT_SP, 10);
+        dtv.setGravity(Gravity.START);
+        dtv.setText(date.dayOfMonth().getAsText());
+        dtv.setLayoutParams(params);
 
-        return dateTextView;
+        // Highlight today's date
+        if (date.equals(today)) {
+            dtv.setTextColor(getResources().getColor(R.color.colorDateHighlight));
+            dtv.setTypeface(null, Typeface.BOLD);
+            dtv.setPaintFlags(dtv.getPaintFlags() | Paint.UNDERLINE_TEXT_FLAG);
+        } else if (date.monthOfYear().equals(displayedMonth.monthOfYear())){
+            dtv.setTextColor(Color.BLACK);
+        } else {
+            dtv.setTextColor(Color.GRAY);
+        }
+
+        return dtv;
     }
+
+    // LinearLayout with a TextView as the date and ScrollView + LinearLayout for events list
+    private LinearLayout createDateBoxView(DateTime date) {
+        LinearLayout dateBox = new LinearLayout(MainActivity.this);
+        LinearLayout.LayoutParams params = new LinearLayout.LayoutParams(
+                0,
+                LayoutParams.WRAP_CONTENT,
+                1f
+        );
+        
+        dateBox.setLayoutParams(params);
+        dateBox.setOrientation(LinearLayout.VERTICAL);
+        dateBox.addView(createDateTextView(date));
+
+        return dateBox;
+    }
+
 }

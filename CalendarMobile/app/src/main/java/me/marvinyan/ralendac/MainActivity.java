@@ -18,6 +18,7 @@ import android.view.MenuItem;
 import android.view.View;
 import android.widget.LinearLayout;
 import android.widget.LinearLayout.LayoutParams;
+import android.widget.ScrollView;
 import android.widget.TextView;
 import com.android.volley.Request.Method;
 import java.util.List;
@@ -168,12 +169,13 @@ public class MainActivity extends AppCompatActivity {
                     0,
                     1f
             );
+            int margin = getResources().getDimensionPixelSize(R.dimen.datebox_margin);
+            params.setMargins(0, 8, margin, 0);
 
             week.setWeightSum(7);
             week.setLayoutParams(params);
             week.setBackgroundDrawable(
                     ContextCompat.getDrawable(MainActivity.this, R.drawable.border_bottom_gray));
-            week.setPadding(40, 8, 27, 0); // TODO: Make this responsive
 
             weeks[i] = week;
             weeksContainer.addView(week);
@@ -233,7 +235,7 @@ public class MainActivity extends AppCompatActivity {
         dtv.setText(date.dayOfMonth().getAsText());
         dtv.setLayoutParams(params);
 
-        // Highlight today's date
+        // Highlight today's date, darken selected month's dates, lighten preceding/following dates
         if (date.equals(today)) {
             dtv.setTextColor(getResources().getColor(R.color.colorDateHighlight));
             dtv.setTypeface(null, Typeface.BOLD);
@@ -247,7 +249,7 @@ public class MainActivity extends AppCompatActivity {
         return dtv;
     }
 
-    // LinearLayout with a TextView as the date and ScrollView + LinearLayout for events list
+    // LinearLayout with a TextView as the date and ScrollView>LinearLayout>TextViews for events
     private LinearLayout createDateBoxView(DateTime date) {
         LinearLayout dateBox = new LinearLayout(MainActivity.this);
         LinearLayout.LayoutParams params = new LinearLayout.LayoutParams(
@@ -255,12 +257,46 @@ public class MainActivity extends AppCompatActivity {
                 LayoutParams.WRAP_CONTENT,
                 1f
         );
-        
+
+        dateBox.setTag(date); // For seeding event activity
+
+        int margin = getResources().getDimensionPixelSize(R.dimen.datebox_margin);
+        params.setMargins(margin, 0, 0, 0);
+
         dateBox.setLayoutParams(params);
         dateBox.setOrientation(LinearLayout.VERTICAL);
         dateBox.addView(createDateTextView(date));
+        dateBox.addView(createEventsScrollView());
 
         return dateBox;
     }
 
+    private ScrollView createEventsScrollView() {
+        ScrollView eventsScrollView = new ScrollView(MainActivity.this);
+        LinearLayout eventList = new LinearLayout(MainActivity.this);
+        LinearLayout.LayoutParams params = new LinearLayout.LayoutParams(LayoutParams.MATCH_PARENT, LayoutParams.WRAP_CONTENT);
+
+        eventList.setLayoutParams(params);
+        eventList.setOrientation(LinearLayout.VERTICAL);
+
+        eventList.addView(createEventTextView());
+        eventList.addView(createEventTextView());
+
+        eventsScrollView.addView(eventList);
+
+        return eventsScrollView;
+    }
+
+    private TextView createEventTextView() {
+        TextView dtv = new TextView(MainActivity.this);
+        LinearLayout.LayoutParams params = new LinearLayout.LayoutParams(LayoutParams.WRAP_CONTENT, LayoutParams.WRAP_CONTENT);
+
+        dtv.setTextSize(TypedValue.COMPLEX_UNIT_SP, 10);
+        dtv.setGravity(Gravity.START);
+        dtv.setText("Wow an event");
+        dtv.setSingleLine(true);
+        dtv.setLayoutParams(params);
+
+        return dtv;
+    }
 }

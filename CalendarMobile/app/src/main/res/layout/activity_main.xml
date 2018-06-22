@@ -11,15 +11,17 @@
         android:gravity="top"
         android:orientation="vertical">
 
+        <!--android:paddingStart="15dp"-->
+        <!--android:paddingEnd="15dp"-->
+        <!--android:paddingLeft="15dp"-->
+        <!--android:paddingRight="15dp"-->
         <LinearLayout
             android:id="@+id/layout_calendar_day_header"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
+            android:layout_marginEnd="10dp"
+            android:layout_marginRight="10dp"
             android:paddingTop="8dp"
-            android:paddingStart="15dp"
-            android:paddingEnd="10dp"
-            android:paddingLeft="15dp"
-            android:paddingRight="10dp"
             android:weightSum="7">
 
             <TextView
@@ -27,64 +29,71 @@
                 android:layout_width="0dp"
                 android:layout_height="wrap_content"
                 android:layout_weight="1"
+                android:layout_marginStart="10dp"
+                android:layout_marginLeft="10dp"
                 android:gravity="start"
                 android:text="@string/day_sunday"
-                android:textSize="12sp"
-                />
+                android:textSize="12sp"/>
             <TextView
                 android:textStyle="bold"
                 android:layout_width="0dp"
                 android:layout_height="wrap_content"
                 android:layout_weight="1"
+                android:layout_marginStart="10dp"
+                android:layout_marginLeft="10dp"
                 android:gravity="start"
                 android:text="@string/day_monday"
-                android:textSize="12sp"
-                />
+                android:textSize="12sp"/>
             <TextView
                 android:textStyle="bold"
                 android:layout_width="0dp"
                 android:layout_height="wrap_content"
                 android:layout_weight="1"
+                android:layout_marginStart="10dp"
+                android:layout_marginLeft="10dp"
                 android:gravity="start"
                 android:text="@string/day_tuesday"
-                android:textSize="12sp"
-                />
+                android:textSize="12sp"/>
             <TextView
                 android:textStyle="bold"
                 android:layout_width="0dp"
                 android:layout_height="wrap_content"
                 android:layout_weight="1"
+                android:layout_marginStart="10dp"
+                android:layout_marginLeft="10dp"
                 android:gravity="start"
                 android:text="@string/day_wednesday"
-                android:textSize="12sp"
-                />
+                android:textSize="12sp"/>
             <TextView
                 android:textStyle="bold"
                 android:layout_width="0dp"
                 android:layout_height="wrap_content"
                 android:layout_weight="1"
+                android:layout_marginStart="10dp"
+                android:layout_marginLeft="10dp"
                 android:gravity="start"
                 android:text="@string/day_thursday"
-                android:textSize="12sp"
-                />
+                android:textSize="12sp"/>
             <TextView
                 android:textStyle="bold"
                 android:layout_width="0dp"
                 android:layout_height="wrap_content"
                 android:layout_weight="1"
+                android:layout_marginStart="10dp"
+                android:layout_marginLeft="10dp"
                 android:gravity="start"
                 android:text="@string/day_friday"
-                android:textSize="12sp"
-                />
+                android:textSize="12sp"/>
             <TextView
                 android:textStyle="bold"
                 android:layout_width="0dp"
                 android:layout_height="wrap_content"
                 android:layout_weight="1"
+                android:layout_marginStart="10dp"
+                android:layout_marginLeft="10dp"
                 android:gravity="start"
                 android:text="@string/day_saturday"
-                android:textSize="12sp"
-                />
+                android:textSize="12sp"/>
         </LinearLayout>
 
         <LinearLayout

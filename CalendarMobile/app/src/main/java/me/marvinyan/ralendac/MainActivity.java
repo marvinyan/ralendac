@@ -3,12 +3,13 @@ package me.marvinyan.ralendac;
 import android.app.Activity;
 import android.content.Intent;
 import android.graphics.Color;
+import android.graphics.Paint;
+import android.graphics.Typeface;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
 import android.support.v4.content.ContextCompat;
 import android.support.v4.widget.SwipeRefreshLayout;
 import android.support.v7.app.AppCompatActivity;
-import android.util.Log;
 import android.util.TypedValue;
 import android.view.Gravity;
 import android.view.Menu;
@@ -36,6 +37,7 @@ public class MainActivity extends AppCompatActivity {
     private static final int NUM_WEEKS_DISPLAYED = 6;
 
     private DateTime displayedMonth;
+    private DateTime today;
     private SwipeRefreshLayout swipeLayout;
 //    private TextView mLogTextView;
     private List<Event> allEvents;
@@ -56,7 +58,8 @@ public class MainActivity extends AppCompatActivity {
                     }
                 });
 
-        displayedMonth = new DateTime(); // Display current month on app start
+        displayedMonth = new DateTime().withTimeAtStartOfDay(); // Display current month on app start
+        today = new DateTime().withTimeAtStartOfDay();
 
         getEvents();
         buildCalendar();
@@ -176,7 +179,7 @@ public class MainActivity extends AppCompatActivity {
             weeksContainer.addView(week);
         }
 
-        // Populate first week (with last month's days included)
+        // Populate last month's final dates if space available
         int prevMonthTotalDays = displayedMonth.minusMonths(1).dayOfMonth().getMaximumValue();
         int curMonthTotalDays = displayedMonth.dayOfMonth().getMaximumValue();
         int firstDayOfCurMonth = displayedMonth.withDayOfMonth(1).dayOfWeek().get();
@@ -189,9 +192,7 @@ public class MainActivity extends AppCompatActivity {
             }
         }
 
-        // Populate days 1 to 30 of current month
-        // Since Sunday is not the first day of week according to ISO standard, I decided not to
-        // call this curWeek
+        // Populate dates of current month
         int curWeekRow = 0;
         int curDayOfWeek = firstDayOfCurMonth;
         for (int i = 1; i <= curMonthTotalDays; i++) {
@@ -200,7 +201,16 @@ public class MainActivity extends AppCompatActivity {
             }
 
             TextView dtv = createDateTextView(i);
-            dtv.setTextColor(Color.BLACK);
+
+            // Highlight today's date
+            if (displayedMonth.withDayOfMonth(i).equals(today)) {
+                dtv.setTextColor(getResources().getColor(R.color.colorDateHighlight));
+                dtv.setTypeface(null, Typeface.BOLD);
+                dtv.setPaintFlags(dtv.getPaintFlags() | Paint.UNDERLINE_TEXT_FLAG);
+            } else {
+                dtv.setTextColor(Color.BLACK);
+            }
+
             weeks[curWeekRow].addView(dtv);
 
             curDayOfWeek++;
@@ -209,7 +219,7 @@ public class MainActivity extends AppCompatActivity {
             }
         }
 
-        // Populate next month's dates if space available
+        // Populate next month's starting dates if space available
         int nextMonthCurDate = 1;
         for (int week = curWeekRow; week < NUM_WEEKS_DISPLAYED;) {
             LinearLayout finalWeek = weeks[week];

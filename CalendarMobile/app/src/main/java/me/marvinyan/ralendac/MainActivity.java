@@ -20,14 +20,20 @@ import android.widget.LinearLayout;
 import android.widget.LinearLayout.LayoutParams;
 import android.widget.ScrollView;
 import android.widget.TextView;
+import android.widget.Toast;
 import com.android.volley.Request.Method;
+import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 import me.marvinyan.ralendac.models.Event;
+import me.marvinyan.ralendac.utilities.EventUtils;
 import me.marvinyan.ralendac.utilities.JsonUtils;
 import me.marvinyan.ralendac.utilities.NetworkUtils;
 import me.marvinyan.ralendac.utilities.VolleyResponseListener;
 import me.marvinyan.ralendac.utilities.VolleyUtils;
 import org.joda.time.DateTime;
+import org.joda.time.format.DateTimeFormat;
+import org.joda.time.format.DateTimeFormatter;
 import org.json.JSONException;
 import org.json.JSONObject;
 
@@ -38,27 +44,24 @@ public class MainActivity extends AppCompatActivity {
 
     private DateTime displayedMonth;
     private DateTime today;
-    //    private TextView mLogTextView;
-    private List<Event> allEvents;
+    private Map<DateTime, List<Event>> mappedEvents;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
-//        mLogTextView = findViewById(R.id.tv_json_log);
-
         displayedMonth = new DateTime()
                 .withTimeAtStartOfDay(); // Display current month on app start
         today = new DateTime().withTimeAtStartOfDay();
 
         getEvents();
-        buildCalendar();
     }
 
     @Override
     protected void onActivityResult(int requestCode, int resultCode, @Nullable Intent data) {
         super.onActivityResult(requestCode, resultCode, data);
+
         // Refetch events if an event was created, edited, or deleted.
         // TODO: Save an API call by just updating allEvents with return result of EventActivity
         if (requestCode == EVENT_REQUEST_CODE && resultCode == Activity.RESULT_OK) {
@@ -84,8 +87,6 @@ public class MainActivity extends AppCompatActivity {
                 break;
         }
 
-        LinearLayout weeksContainer = findViewById(R.id.layout_calendar_weeks);
-        weeksContainer.removeAllViews();
         buildCalendar();
 
         return super.onOptionsItemSelected(item);
@@ -120,20 +121,18 @@ public class MainActivity extends AppCompatActivity {
                 new VolleyResponseListener() {
                     @Override
                     public void onError(String message) {
-//                        mLogTextView.setText(message);
+                        Toast.makeText(MainActivity.this, "Unable to connect to server",
+                                Toast.LENGTH_LONG)
+                                .show();
                     }
 
                     @Override
                     public void onResponse(Object response) {
                         try {
-                            allEvents = JsonUtils.getEventsFromJson((JSONObject) response);
-                            StringBuilder builder = new StringBuilder();
-
-                            for (Event event : allEvents) {
-                                builder.append(event.toString() + "\n");
-                            }
-
-//                            mLogTextView.setText(builder.toString());
+                            List<Event> allEvents = JsonUtils
+                                    .getEventsFromJson((JSONObject) response);
+                            mappedEvents = EventUtils.getMappedEvents(allEvents);
+                            buildCalendar();
                         } catch (JSONException e) {
                             e.printStackTrace();
                         }
@@ -142,10 +141,13 @@ public class MainActivity extends AppCompatActivity {
     }
 
     private void buildCalendar() {
-        setTitle(
-                displayedMonth.monthOfYear().getAsText() + " " + displayedMonth.year().getAsText());
-        LinearLayout[] weeks = new LinearLayout[NUM_WEEKS_DISPLAYED];
         LinearLayout weeksContainer = findViewById(R.id.layout_calendar_weeks);
+        weeksContainer.removeAllViews();
+
+        DateTimeFormatter formatter = DateTimeFormat.forPattern("MMMM Y");
+        setTitle(formatter.print(displayedMonth));
+
+        LinearLayout[] weeks = new LinearLayout[NUM_WEEKS_DISPLAYED];
 
         // Build rows representing weeks
         for (int i = 0; i < NUM_WEEKS_DISPLAYED; i++) {
@@ -213,6 +215,42 @@ public class MainActivity extends AppCompatActivity {
         }
     }
 
+    // LinearLayout with a TextView as the date and ScrollView>LinearLayout>TextViews for events
+    private LinearLayout createDateBoxView(DateTime date) {
+        LinearLayout dateBox = new LinearLayout(MainActivity.this);
+        LinearLayout.LayoutParams params = new LinearLayout.LayoutParams(
+                0,
+                LayoutParams.MATCH_PARENT,
+                1f
+        );
+
+        dateBox.setTag(date);
+
+        int margin = getResources().getDimensionPixelSize(R.dimen.margin_datebox);
+        params.setMargins(margin, 0, 0, 0);
+
+        dateBox.setClickable(true);
+        dateBox.setLayoutParams(params);
+        dateBox.setOrientation(LinearLayout.VERTICAL);
+        dateBox.addView(createDateTextView(date));
+
+        List<Event> eventsOfTheDay = new ArrayList<>();
+        if (mappedEvents.containsKey(date)) {
+            eventsOfTheDay = mappedEvents.get(date);
+        }
+        dateBox.addView(createEventsScrollView(eventsOfTheDay));
+
+        // Create new event trigger
+        dateBox.setOnClickListener(new OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                startNewEventActivity((DateTime) view.getTag());
+            }
+        });
+
+        return dateBox;
+    }
+
     private TextView createDateTextView(DateTime date) {
         TextView dtv = new TextView(MainActivity.this);
         LinearLayout.LayoutParams params = new LinearLayout.LayoutParams(LayoutParams.WRAP_CONTENT,
@@ -237,43 +275,7 @@ public class MainActivity extends AppCompatActivity {
         return dtv;
     }
 
-    // LinearLayout with a TextView as the date and ScrollView>LinearLayout>TextViews for events
-    private LinearLayout createDateBoxView(DateTime date) {
-        LinearLayout dateBox = new LinearLayout(MainActivity.this);
-        LinearLayout.LayoutParams params = new LinearLayout.LayoutParams(
-                0,
-                LayoutParams.MATCH_PARENT,
-                1f
-        );
-
-        dateBox.setTag(date);
-
-        int margin = getResources().getDimensionPixelSize(R.dimen.margin_datebox);
-        params.setMargins(margin, 0, 0, 0);
-
-        dateBox.setClickable(true);
-        dateBox.setLayoutParams(params);
-        dateBox.setOrientation(LinearLayout.VERTICAL);
-        dateBox.addView(createDateTextView(date));
-
-        Event dummyEvent = new Event(1, "Event 1", new DateTime(), new DateTime().plusHours(1));
-        Event dummyEvent2 = new Event(2, "Event 2", new DateTime().plusHours(1),
-                new DateTime().plusHours(2));
-        Event[] eventsOfTheDay = new Event[]{dummyEvent, dummyEvent2};
-        dateBox.addView(createEventsScrollView(eventsOfTheDay));
-
-        // Create new event trigger
-        dateBox.setOnClickListener(new OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                startNewEventActivity((DateTime) view.getTag());
-            }
-        });
-
-        return dateBox;
-    }
-
-    private ScrollView createEventsScrollView(Event[] eventsOfTheDay) {
+    private ScrollView createEventsScrollView(List<Event> eventsOfTheDay) {
         ScrollView eventsScrollView = new ScrollView(MainActivity.this);
         LinearLayout eventList = new LinearLayout(MainActivity.this);
         LinearLayout.LayoutParams params = new LinearLayout.LayoutParams(LayoutParams.MATCH_PARENT,
@@ -292,7 +294,7 @@ public class MainActivity extends AppCompatActivity {
 
     private TextView createEventTextView(final Event event) {
         TextView dtv = new TextView(MainActivity.this);
-        LinearLayout.LayoutParams params = new LinearLayout.LayoutParams(LayoutParams.WRAP_CONTENT,
+        LinearLayout.LayoutParams params = new LinearLayout.LayoutParams(LayoutParams.MATCH_PARENT,
                 LayoutParams.WRAP_CONTENT);
 
         int marginTop = getResources().getDimensionPixelSize(R.dimen.margin_top_event);

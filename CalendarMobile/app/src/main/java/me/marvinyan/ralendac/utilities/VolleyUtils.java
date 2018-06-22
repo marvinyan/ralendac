@@ -36,7 +36,9 @@ public class VolleyUtils {
                         new Response.ErrorListener() {
                             @Override
                             public void onErrorResponse(VolleyError error) {
-                                listener.onError(String.valueOf(error.networkResponse.statusCode));
+                                if (error.networkResponse != null) {
+                                    listener.onError(String.valueOf(error.networkResponse.statusCode));
+                                }
                             }
                         });
 
@@ -62,7 +64,9 @@ public class VolleyUtils {
                         new Response.ErrorListener() {
                             @Override
                             public void onErrorResponse(VolleyError error) {
-                                listener.onError(String.valueOf(error.networkResponse.statusCode));
+                                if (error.networkResponse != null) {
+                                    listener.onError(String.valueOf(error.networkResponse.statusCode));
+                                }
                             }
                         }) {
                     @Override

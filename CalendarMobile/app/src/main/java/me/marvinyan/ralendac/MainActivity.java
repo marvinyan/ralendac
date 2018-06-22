@@ -8,7 +8,6 @@ import android.graphics.Typeface;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
 import android.support.v4.content.ContextCompat;
-import android.support.v4.widget.SwipeRefreshLayout;
 import android.support.v7.app.AppCompatActivity;
 import android.util.TypedValue;
 import android.view.Gravity;
@@ -39,7 +38,6 @@ public class MainActivity extends AppCompatActivity {
 
     private DateTime displayedMonth;
     private DateTime today;
-    private SwipeRefreshLayout swipeLayout;
 //    private TextView mLogTextView;
     private List<Event> allEvents;
 
@@ -49,15 +47,6 @@ public class MainActivity extends AppCompatActivity {
         setContentView(R.layout.activity_main);
 
 //        mLogTextView = findViewById(R.id.tv_json_log);
-
-        swipeLayout = findViewById(R.id.swipeLayout);
-        swipeLayout.setOnRefreshListener(
-                new SwipeRefreshLayout.OnRefreshListener() {
-                    @Override
-                    public void onRefresh() {
-                        getEvents();
-                    }
-                });
 
         displayedMonth = new DateTime().withTimeAtStartOfDay(); // Display current month on app start
         today = new DateTime().withTimeAtStartOfDay();
@@ -134,7 +123,6 @@ public class MainActivity extends AppCompatActivity {
                     @Override
                     public void onError(String message) {
 //                        mLogTextView.setText(message);
-                        swipeLayout.setRefreshing(false);
                     }
 
                     @Override
@@ -151,7 +139,6 @@ public class MainActivity extends AppCompatActivity {
                         } catch (JSONException e) {
                             e.printStackTrace();
                         }
-                        swipeLayout.setRefreshing(false);
                     }
                 });
     }
@@ -279,6 +266,12 @@ public class MainActivity extends AppCompatActivity {
         eventList.setLayoutParams(params);
         eventList.setOrientation(LinearLayout.VERTICAL);
 
+        eventList.addView(createEventTextView());
+        eventList.addView(createEventTextView());
+        eventList.addView(createEventTextView());
+        eventList.addView(createEventTextView());
+        eventList.addView(createEventTextView());
+        eventList.addView(createEventTextView());
         eventList.addView(createEventTextView());
         eventList.addView(createEventTextView());
 

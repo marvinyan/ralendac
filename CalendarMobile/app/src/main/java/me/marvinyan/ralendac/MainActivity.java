@@ -21,6 +21,7 @@ import android.widget.ScrollView;
 import android.widget.TextView;
 import com.android.volley.Request.Method;
 import java.util.List;
+import java.util.Random;
 import me.marvinyan.ralendac.models.Event;
 import me.marvinyan.ralendac.utilities.JsonUtils;
 import me.marvinyan.ralendac.utilities.NetworkUtils;
@@ -38,7 +39,7 @@ public class MainActivity extends AppCompatActivity {
 
     private DateTime displayedMonth;
     private DateTime today;
-//    private TextView mLogTextView;
+    //    private TextView mLogTextView;
     private List<Event> allEvents;
 
     @Override
@@ -48,7 +49,8 @@ public class MainActivity extends AppCompatActivity {
 
 //        mLogTextView = findViewById(R.id.tv_json_log);
 
-        displayedMonth = new DateTime().withTimeAtStartOfDay(); // Display current month on app start
+        displayedMonth = new DateTime()
+                .withTimeAtStartOfDay(); // Display current month on app start
         today = new DateTime().withTimeAtStartOfDay();
 
         getEvents();
@@ -144,7 +146,8 @@ public class MainActivity extends AppCompatActivity {
     }
 
     private void buildCalendar() {
-        setTitle(displayedMonth.monthOfYear().getAsText() + " " + displayedMonth.year().getAsText());
+        setTitle(
+                displayedMonth.monthOfYear().getAsText() + " " + displayedMonth.year().getAsText());
         LinearLayout[] weeks = new LinearLayout[NUM_WEEKS_DISPLAYED];
         LinearLayout weeksContainer = findViewById(R.id.layout_calendar_weeks);
 
@@ -156,7 +159,7 @@ public class MainActivity extends AppCompatActivity {
                     0,
                     1f
             );
-            int margin = getResources().getDimensionPixelSize(R.dimen.datebox_margin);
+            int margin = getResources().getDimensionPixelSize(R.dimen.margin_datebox);
             params.setMargins(0, 8, margin, 0);
 
             week.setWeightSum(7);
@@ -176,7 +179,8 @@ public class MainActivity extends AppCompatActivity {
         DateTime prevMonth = displayedMonth.minusMonths(1);
         if (firstDayOfCurMonth != 7) {
             for (int i = firstDayOfCurMonth - 1; i >= 0; i--) {
-                LinearLayout dateBox = createDateBoxView(prevMonth.withDayOfMonth(prevMonthTotalDays - i));
+                LinearLayout dateBox = createDateBoxView(
+                        prevMonth.withDayOfMonth(prevMonthTotalDays - i));
                 weeks[0].addView(dateBox);
             }
         }
@@ -202,7 +206,7 @@ public class MainActivity extends AppCompatActivity {
         // Populate next month's starting dates if space available
         DateTime nextMonth = displayedMonth.plusMonths(1).withDayOfMonth(1);
 
-        for (int week = curWeekRow; week < NUM_WEEKS_DISPLAYED;) {
+        for (int week = curWeekRow; week < NUM_WEEKS_DISPLAYED; ) {
             LinearLayout finalWeek = weeks[week];
             if (finalWeek.getChildCount() == 7) {
                 week++;
@@ -215,7 +219,8 @@ public class MainActivity extends AppCompatActivity {
 
     private TextView createDateTextView(DateTime date) {
         TextView dtv = new TextView(MainActivity.this);
-        LinearLayout.LayoutParams params = new LinearLayout.LayoutParams(LayoutParams.WRAP_CONTENT, LayoutParams.WRAP_CONTENT);
+        LinearLayout.LayoutParams params = new LinearLayout.LayoutParams(LayoutParams.WRAP_CONTENT,
+                LayoutParams.WRAP_CONTENT);
 
         dtv.setTextSize(TypedValue.COMPLEX_UNIT_SP, 10);
         dtv.setGravity(Gravity.START);
@@ -227,7 +232,7 @@ public class MainActivity extends AppCompatActivity {
             dtv.setTextColor(getResources().getColor(R.color.colorDateHighlight));
             dtv.setTypeface(null, Typeface.BOLD);
             dtv.setPaintFlags(dtv.getPaintFlags() | Paint.UNDERLINE_TEXT_FLAG);
-        } else if (date.monthOfYear().equals(displayedMonth.monthOfYear())){
+        } else if (date.monthOfYear().equals(displayedMonth.monthOfYear())) {
             dtv.setTextColor(Color.BLACK);
         } else {
             dtv.setTextColor(Color.GRAY);
@@ -247,9 +252,10 @@ public class MainActivity extends AppCompatActivity {
 
         dateBox.setTag(date); // For seeding event activity
 
-        int margin = getResources().getDimensionPixelSize(R.dimen.datebox_margin);
+        int margin = getResources().getDimensionPixelSize(R.dimen.margin_datebox);
         params.setMargins(margin, 0, 0, 0);
 
+        dateBox.setClickable(true);
         dateBox.setLayoutParams(params);
         dateBox.setOrientation(LinearLayout.VERTICAL);
         dateBox.addView(createDateTextView(date));
@@ -261,33 +267,45 @@ public class MainActivity extends AppCompatActivity {
     private ScrollView createEventsScrollView() {
         ScrollView eventsScrollView = new ScrollView(MainActivity.this);
         LinearLayout eventList = new LinearLayout(MainActivity.this);
-        LinearLayout.LayoutParams params = new LinearLayout.LayoutParams(LayoutParams.MATCH_PARENT, LayoutParams.WRAP_CONTENT);
+        LinearLayout.LayoutParams params = new LinearLayout.LayoutParams(LayoutParams.MATCH_PARENT,
+                LayoutParams.WRAP_CONTENT);
 
         eventList.setLayoutParams(params);
         eventList.setOrientation(LinearLayout.VERTICAL);
 
-        eventList.addView(createEventTextView());
-        eventList.addView(createEventTextView());
-        eventList.addView(createEventTextView());
-        eventList.addView(createEventTextView());
-        eventList.addView(createEventTextView());
-        eventList.addView(createEventTextView());
-        eventList.addView(createEventTextView());
-        eventList.addView(createEventTextView());
+        int randAmt = new Random().nextInt(5) + 1;
+        float chanceToShow = new Random().nextFloat();
+        if (chanceToShow < 0.2) {
+            for (int i = 0; i < randAmt; i++) {
+                eventList.addView(createEventTextView());
+            }
+        }
 
         eventsScrollView.addView(eventList);
-
         return eventsScrollView;
     }
 
     private TextView createEventTextView() {
         TextView dtv = new TextView(MainActivity.this);
-        LinearLayout.LayoutParams params = new LinearLayout.LayoutParams(LayoutParams.WRAP_CONTENT, LayoutParams.WRAP_CONTENT);
+        LinearLayout.LayoutParams params = new LinearLayout.LayoutParams(LayoutParams.WRAP_CONTENT,
+                LayoutParams.WRAP_CONTENT);
 
+        int marginTop = getResources().getDimensionPixelSize(R.dimen.margin_top_event);
+        params.setMargins(0, marginTop, 0, 0);
+
+
+        dtv.setBackgroundDrawable(
+                ContextCompat.getDrawable(MainActivity.this, R.drawable.background_rounded_event));
+        dtv.setTextColor(Color.WHITE);
+        int paddingSides = getResources().getDimensionPixelSize(R.dimen.padding_sides_event);
+        dtv.setPadding(paddingSides, 0, 0, paddingSides);
+
+        dtv.setClickable(true);
         dtv.setTextSize(TypedValue.COMPLEX_UNIT_SP, 10);
         dtv.setGravity(Gravity.START);
         dtv.setText("Wow an event");
         dtv.setSingleLine(true);
+        dtv.setTypeface(null, Typeface.BOLD);
         dtv.setLayoutParams(params);
 
         return dtv;

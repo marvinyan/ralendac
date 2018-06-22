@@ -8,4 +8,5 @@
     <color name="colorPrimaryDark">#00171F</color>
     <color name="colorAccent">#007EA7</color>
     <color name="colorDateHighlight">#FF6B6B</color>
+    <color name="colorEventHighlight">#7cb342</color>
 </resources>

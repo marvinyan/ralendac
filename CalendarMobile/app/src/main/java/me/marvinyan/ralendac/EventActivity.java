@@ -18,13 +18,13 @@ import android.widget.TimePicker;
 import android.widget.Toast;
 import com.android.volley.Request.Method;
 import java.util.HashMap;
+import java.util.Locale;
 import java.util.Map;
 import me.marvinyan.ralendac.utilities.NetworkUtils;
 import me.marvinyan.ralendac.utilities.VolleyResponseListener;
 import me.marvinyan.ralendac.utilities.VolleyUtils;
 import org.joda.time.DateTime;
 import org.joda.time.DateTimeZone;
-import org.joda.time.LocalDate;
 import org.joda.time.LocalTime;
 import org.joda.time.format.DateTimeFormat;
 import org.joda.time.format.DateTimeFormatter;
@@ -35,7 +35,7 @@ public class EventActivity extends AppCompatActivity {
     private TextView mStartTimeTextView;
     private TextView mEndTimeTextView;
 
-    private LocalDate mSelectedDate;
+    private DateTime mSelectedDate;
     private DateTime mStartTime;
     private DateTime mEndTime;
     private int mEventId;
@@ -62,6 +62,13 @@ public class EventActivity extends AppCompatActivity {
 
         setupToolbar();
         setupInitialTimes();
+        setupHeadingTextView();
+    }
+
+    private void setupHeadingTextView() {
+        DateTimeFormatter formatter = DateTimeFormat.fullDate().withLocale(Locale.getDefault());
+        TextView selectedDateTV = findViewById(R.id.tv_selected_date);
+        selectedDateTV.setText(formatter.print(mSelectedDate));
     }
 
     // Close activity instead of up navigating
@@ -220,15 +227,15 @@ public class EventActivity extends AppCompatActivity {
             mStartTime = (DateTime) parentIntent.getSerializableExtra("startTime");
             mEndTime = (DateTime) parentIntent.getSerializableExtra("endTime");
             mSelectedDate =
-                    new LocalDate(
+                    new DateTime(
                             mStartTime.getYear(), mStartTime.getMonthOfYear(),
-                            mStartTime.getDayOfMonth());
+                            mStartTime.getDayOfMonth(), 0, 0);
         } else {
             // Creating new event:
             //      - Set start time to selected date with current time.
             //      - Set end time to the lesser of 1 hour after start time or 11:59pm.
             LocalTime now = new LocalTime();
-            mSelectedDate = (LocalDate) parentIntent.getSerializableExtra("selectedDate");
+            mSelectedDate = (DateTime) parentIntent.getSerializableExtra("selectedDate");
             mStartTime =
                     new DateTime(
                             mSelectedDate.getYear(),

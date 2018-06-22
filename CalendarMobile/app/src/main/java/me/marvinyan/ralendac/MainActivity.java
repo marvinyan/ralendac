@@ -15,20 +15,19 @@ import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.view.View;
+import android.view.View.OnClickListener;
 import android.widget.LinearLayout;
 import android.widget.LinearLayout.LayoutParams;
 import android.widget.ScrollView;
 import android.widget.TextView;
 import com.android.volley.Request.Method;
 import java.util.List;
-import java.util.Random;
 import me.marvinyan.ralendac.models.Event;
 import me.marvinyan.ralendac.utilities.JsonUtils;
 import me.marvinyan.ralendac.utilities.NetworkUtils;
 import me.marvinyan.ralendac.utilities.VolleyResponseListener;
 import me.marvinyan.ralendac.utilities.VolleyUtils;
 import org.joda.time.DateTime;
-import org.joda.time.LocalDate;
 import org.json.JSONException;
 import org.json.JSONObject;
 
@@ -93,19 +92,16 @@ public class MainActivity extends AppCompatActivity {
     }
 
 
-    public void startNewEventActivity(View view) {
+    public void startNewEventActivity(DateTime selectedDate) {
         Intent eventActivityIntent = new Intent(MainActivity.this, EventActivity.class);
 
-        LocalDate newEventTime = new LocalDate(2018, 6, 19);
-        eventActivityIntent.putExtra("selectedDate", newEventTime);
+        eventActivityIntent.putExtra("selectedDate", selectedDate);
 
         startActivityForResult(eventActivityIntent, EVENT_REQUEST_CODE);
     }
 
-    public void startEditEventActivity(View view) {
+    public void startEditEventActivity(Event selectedEvent) {
         Intent eventActivityIntent = new Intent(MainActivity.this, EventActivity.class);
-
-        Event selectedEvent = allEvents.get(allEvents.size() - 1);
 
         eventActivityIntent.putExtra("eventId", selectedEvent.getId());
         eventActivityIntent.putExtra("description", selectedEvent.getDescription());
@@ -246,11 +242,11 @@ public class MainActivity extends AppCompatActivity {
         LinearLayout dateBox = new LinearLayout(MainActivity.this);
         LinearLayout.LayoutParams params = new LinearLayout.LayoutParams(
                 0,
-                LayoutParams.WRAP_CONTENT,
+                LayoutParams.MATCH_PARENT,
                 1f
         );
 
-        dateBox.setTag(date); // For seeding event activity
+        dateBox.setTag(date);
 
         int margin = getResources().getDimensionPixelSize(R.dimen.margin_datebox);
         params.setMargins(margin, 0, 0, 0);
@@ -259,12 +255,25 @@ public class MainActivity extends AppCompatActivity {
         dateBox.setLayoutParams(params);
         dateBox.setOrientation(LinearLayout.VERTICAL);
         dateBox.addView(createDateTextView(date));
-        dateBox.addView(createEventsScrollView());
+
+        Event dummyEvent = new Event(1, "Event 1", new DateTime(), new DateTime().plusHours(1));
+        Event dummyEvent2 = new Event(2, "Event 2", new DateTime().plusHours(1),
+                new DateTime().plusHours(2));
+        Event[] eventsOfTheDay = new Event[]{dummyEvent, dummyEvent2};
+        dateBox.addView(createEventsScrollView(eventsOfTheDay));
+
+        // Create new event trigger
+        dateBox.setOnClickListener(new OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                startNewEventActivity((DateTime) view.getTag());
+            }
+        });
 
         return dateBox;
     }
 
-    private ScrollView createEventsScrollView() {
+    private ScrollView createEventsScrollView(Event[] eventsOfTheDay) {
         ScrollView eventsScrollView = new ScrollView(MainActivity.this);
         LinearLayout eventList = new LinearLayout(MainActivity.this);
         LinearLayout.LayoutParams params = new LinearLayout.LayoutParams(LayoutParams.MATCH_PARENT,
@@ -273,19 +282,15 @@ public class MainActivity extends AppCompatActivity {
         eventList.setLayoutParams(params);
         eventList.setOrientation(LinearLayout.VERTICAL);
 
-        int randAmt = new Random().nextInt(5) + 1;
-        float chanceToShow = new Random().nextFloat();
-        if (chanceToShow < 0.2) {
-            for (int i = 0; i < randAmt; i++) {
-                eventList.addView(createEventTextView());
-            }
+        for (Event event : eventsOfTheDay) {
+            eventList.addView(createEventTextView(event));
         }
 
         eventsScrollView.addView(eventList);
         return eventsScrollView;
     }
 
-    private TextView createEventTextView() {
+    private TextView createEventTextView(final Event event) {
         TextView dtv = new TextView(MainActivity.this);
         LinearLayout.LayoutParams params = new LinearLayout.LayoutParams(LayoutParams.WRAP_CONTENT,
                 LayoutParams.WRAP_CONTENT);
@@ -293,21 +298,26 @@ public class MainActivity extends AppCompatActivity {
         int marginTop = getResources().getDimensionPixelSize(R.dimen.margin_top_event);
         params.setMargins(0, marginTop, 0, 0);
 
-
         dtv.setBackgroundDrawable(
                 ContextCompat.getDrawable(MainActivity.this, R.drawable.background_rounded_event));
         dtv.setTextColor(Color.WHITE);
-        int paddingSides = getResources().getDimensionPixelSize(R.dimen.padding_sides_event);
-        dtv.setPadding(paddingSides, 0, 0, paddingSides);
+        int padding = getResources().getDimensionPixelSize(R.dimen.padding_event);
+        dtv.setPadding(padding, padding, padding, padding);
 
         dtv.setClickable(true);
         dtv.setTextSize(TypedValue.COMPLEX_UNIT_SP, 10);
         dtv.setGravity(Gravity.START);
-        dtv.setText("Wow an event");
+        dtv.setText(event.getDescription());
         dtv.setSingleLine(true);
         dtv.setTypeface(null, Typeface.BOLD);
         dtv.setLayoutParams(params);
 
+        dtv.setOnClickListener(new OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                startEditEventActivity(event);
+            }
+        });
         return dtv;
     }
 }

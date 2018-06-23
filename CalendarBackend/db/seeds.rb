@@ -1,4 +1,5 @@
 Event.destroy_all
+DatabaseCleaner.clean_with(:truncation)
 
 year2018 = Date.new(2018, 1, 1)..Date.new(2018, 12, 31)
 zone = 'Eastern Time (US & Canada)'

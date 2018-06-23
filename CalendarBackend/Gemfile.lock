@@ -49,6 +49,7 @@ GEM
     byebug (10.0.2)
     concurrent-ruby (1.0.5)
     crass (1.0.4)
+    database_cleaner (1.6.2)
     erubi (1.7.1)
     faker (1.8.7)
       i18n (>= 0.7)
@@ -142,6 +143,7 @@ PLATFORMS
 DEPENDENCIES
   bootsnap (>= 1.1.0)
   byebug
+  database_cleaner
   faker
   jbuilder (~> 2.5)
   listen (>= 3.0.5, < 3.2)

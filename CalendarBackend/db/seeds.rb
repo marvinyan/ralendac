@@ -6,11 +6,10 @@ zone = 'Eastern Time (US & Canada)'
 
 date_range.each do |date|
     if rand() < 0.2
-        descrip_len = rand(1..5)
-        max_events = rand(1..6)
-
         Time.use_zone(zone) do
-            max_events.times do
+            rand(1..6).times do
+                descrip_len = rand(1..5)
+
                 start_of_day = Time.zone.parse(date.to_s)
                 end_of_day = start_of_day.end_of_day
 

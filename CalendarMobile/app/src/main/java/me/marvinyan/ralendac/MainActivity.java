@@ -130,7 +130,7 @@ public class MainActivity extends AppCompatActivity {
                     public void onResponse(Object response) {
                         try {
                             List<Event> allEvents = JsonUtils
-                                    .getEventsFromJson((JSONObject) response);
+                                    .jsonToEvents((JSONObject) response);
                             mappedEvents = EventUtils.getMappedEvents(allEvents);
                             buildCalendar();
                         } catch (JSONException e) {

@@ -4,8 +4,9 @@ import android.content.Context;
 import com.android.volley.Response;
 import com.android.volley.VolleyError;
 import com.android.volley.toolbox.JsonObjectRequest;
-import com.android.volley.toolbox.StringRequest;
+import java.util.HashMap;
 import java.util.Map;
+import org.json.JSONException;
 import org.json.JSONObject;
 
 /**
@@ -22,27 +23,27 @@ public class VolleyUtils {
             String urlStr,
             int method,
             final VolleyResponseListener listener) {
-        JsonObjectRequest getRequest =
-                new JsonObjectRequest(
-                        method,
-                        urlStr,
-                        null,
-                        new Response.Listener<JSONObject>() {
-                            @Override
-                            public void onResponse(JSONObject response) {
-                                listener.onResponse(response);
-                            }
-                        },
-                        new Response.ErrorListener() {
-                            @Override
-                            public void onErrorResponse(VolleyError error) {
-                                if (error.networkResponse != null) {
-                                    listener.onError(String.valueOf(error.networkResponse.statusCode));
-                                }
-                            }
-                        });
+        JsonObjectRequest jsonObjRequest = new JsonObjectRequest(
+                method,
+                urlStr,
+                null,
+                new Response.Listener<JSONObject>() {
+                    @Override
+                    public void onResponse(JSONObject response) {
+                        listener.onResponse(response);
+                    }
+                },
+                new Response.ErrorListener() {
+                    @Override
+                    public void onErrorResponse(VolleyError error) {
+                        if (error.networkResponse != null) {
+                            listener.onError(
+                                    String.valueOf(error.networkResponse.statusCode));
+                        }
+                    }
+                });
 
-        VolleySingleton.getInstance(context).addToRequestQueue(getRequest);
+        VolleySingleton.getInstance(context).addToRequestQueue(jsonObjRequest);
     }
 
     public static void requestWithParams(
@@ -50,31 +51,40 @@ public class VolleyUtils {
             String urlStr,
             int method,
             final Map<String, String> params,
-            final VolleyResponseListener listener) {
-        StringRequest stringRequest =
-                new StringRequest(
-                        method,
-                        urlStr,
-                        new Response.Listener<String>() {
-                            @Override
-                            public void onResponse(String response) {
-                                listener.onResponse(response);
-                            }
-                        },
-                        new Response.ErrorListener() {
-                            @Override
-                            public void onErrorResponse(VolleyError error) {
-                                if (error.networkResponse != null) {
-                                    listener.onError(String.valueOf(error.networkResponse.statusCode));
-                                }
-                            }
-                        }) {
+            final VolleyResponseListener listener) throws JSONException {
+        JsonObjectRequest jsonObjRequest = new JsonObjectRequest(
+                method,
+                urlStr,
+                JsonUtils.paramsToJson(params),
+                new Response.Listener<JSONObject>() {
                     @Override
-                    public Map<String, String> getParams() {
-                        return params;
+                    public void onResponse(JSONObject response) {
+                        listener.onResponse(response);
                     }
-                };
+                },
+                new Response.ErrorListener() {
+                    @Override
+                    public void onErrorResponse(VolleyError error) {
+                        if (error.networkResponse != null) {
+                            listener.onError(
+                                    String.valueOf(error.networkResponse.statusCode));
+                        }
+                    }
+                }) {
 
-        VolleySingleton.getInstance(context).addToRequestQueue(stringRequest);
+            @Override
+            public Map<String, String> getParams() {
+                return params;
+            }
+
+            @Override
+            public Map<String, String> getHeaders() {
+                Map<String, String> headers = new HashMap<>();
+                headers.put("Content-Type", "application/json; charset=utf-8");
+                return headers;
+            }
+        };
+
+        VolleySingleton.getInstance(context).addToRequestQueue(jsonObjRequest);
     }
 }

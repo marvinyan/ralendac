@@ -28,6 +28,7 @@ import org.joda.time.DateTimeZone;
 import org.joda.time.LocalTime;
 import org.joda.time.format.DateTimeFormat;
 import org.joda.time.format.DateTimeFormatter;
+import org.json.JSONException;
 
 public class EventActivity extends AppCompatActivity {
 
@@ -298,48 +299,52 @@ public class EventActivity extends AppCompatActivity {
     private void sendVolleyRequest(final int method, String urlStr) {
         Map<String, String> params = makeParamsMap();
 
-        VolleyUtils.requestWithParams(
-                EventActivity.this,
-                urlStr,
-                method,
-                params,
-                new VolleyResponseListener() {
-                    @Override
-                    public void onError(String message) {
-                        Toast.makeText(EventActivity.this, "Status code: " + message,
-                                Toast.LENGTH_LONG)
-                                .show();
-                    }
-
-                    @Override
-                    public void onResponse(Object response) {
-                        String toastMsg = "";
-                        switch (method) {
-                            case Method.POST:
-                                toastMsg = "Event was created successfully";
-                                break;
-                            case Method.PUT:
-                                toastMsg = "Event was updated successfully";
-                                break;
-                            case Method.DELETE:
-                                toastMsg = "Event was deleted successfully";
-                                break;
+        try {
+            VolleyUtils.requestWithParams(
+                    EventActivity.this,
+                    urlStr,
+                    method,
+                    params,
+                    new VolleyResponseListener() {
+                        @Override
+                        public void onError(String message) {
+                            Toast.makeText(EventActivity.this, "Status code: " + message,
+                                    Toast.LENGTH_LONG)
+                                    .show();
                         }
 
-                        Toast.makeText(EventActivity.this, toastMsg, Toast.LENGTH_LONG).show();
-                        Intent resultIntent = new Intent();
-                        setResult(Activity.RESULT_OK, resultIntent);
-                        finish();
-                    }
-                });
+                        @Override
+                        public void onResponse(Object response) {
+                            String toastMsg = "";
+                            switch (method) {
+                                case Method.POST:
+                                    toastMsg = "Event was created successfully";
+                                    break;
+                                case Method.PUT:
+                                    toastMsg = "Event was updated successfully";
+                                    break;
+                                case Method.DELETE:
+                                    toastMsg = "Event was deleted successfully";
+                                    break;
+                            }
+
+                            Toast.makeText(EventActivity.this, toastMsg, Toast.LENGTH_LONG).show();
+                            Intent resultIntent = new Intent();
+                            setResult(Activity.RESULT_OK, resultIntent);
+                            finish();
+                        }
+                    });
+        } catch (JSONException e) {
+            Toast.makeText(EventActivity.this, "Unable to send request", Toast.LENGTH_LONG).show();
+        }
     }
 
     private Map<String, String> makeParamsMap() {
         Map<String, String> params = new HashMap<>();
 
-        params.put("event[description]", mDescriptionEditText.getText().toString());
-        params.put("event[start_time]", mStartTime.toDateTime(DateTimeZone.UTC).toString());
-        params.put("event[end_time]", mEndTime.toDateTime(DateTimeZone.UTC).toString());
+        params.put("description", mDescriptionEditText.getText().toString());
+        params.put("start_time", mStartTime.toDateTime(DateTimeZone.UTC).toString());
+        params.put("end_time", mEndTime.toDateTime(DateTimeZone.UTC).toString());
 
         return params;
     }

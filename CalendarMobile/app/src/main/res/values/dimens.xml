@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <dimen name="margin_datebox">10dp</dimen>
+    <dimen name="padding_datebox">10dp</dimen>
     <dimen name="margin_top_event">2dp</dimen>
     <dimen name="padding_event">3dp</dimen>
 </resources>

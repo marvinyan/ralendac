@@ -157,9 +157,10 @@ public class MainActivity extends AppCompatActivity {
                     0,
                     1f
             );
-            int margin = getResources().getDimensionPixelSize(R.dimen.margin_datebox);
-            params.setMargins(0, 8, margin, 0);
+            int paddingRight = getResources().getDimensionPixelSize(R.dimen.padding_datebox);
+            params.setMargins(0, 8, 0, 0);
 
+            week.setPadding(0, 0, paddingRight, 0);
             week.setWeightSum(7);
             week.setLayoutParams(params);
             week.setBackgroundDrawable(
@@ -226,9 +227,8 @@ public class MainActivity extends AppCompatActivity {
 
         dateBox.setTag(date);
 
-        int margin = getResources().getDimensionPixelSize(R.dimen.margin_datebox);
-        params.setMargins(margin, 0, 0, 0);
-
+        int paddingLeft = getResources().getDimensionPixelSize(R.dimen.padding_datebox);
+        dateBox.setPadding(paddingLeft, 0, 0, 0);
         dateBox.setClickable(true);
         dateBox.setLayoutParams(params);
         dateBox.setOrientation(LinearLayout.VERTICAL);

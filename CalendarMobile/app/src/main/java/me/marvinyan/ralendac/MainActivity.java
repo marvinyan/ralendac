@@ -39,21 +39,21 @@ import org.json.JSONObject;
 
 public class MainActivity extends AppCompatActivity {
 
-    private static final int EVENT_REQUEST_CODE = 1;
-    private static final int NUM_WEEKS_DISPLAYED = 6;
+    public static final int EVENT_REQUEST_CODE = 1;
+    public static final int NUM_WEEKS_DISPLAYED = 6;
 
-    private DateTime displayedMonth;
-    private DateTime today;
-    private Map<DateTime, List<Event>> mappedEvents;
+    private DateTime mDisplayedMonth;
+    private DateTime mToday;
+    private Map<DateTime, List<Event>> mMappedEvents;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
-        displayedMonth = new DateTime()
+        mDisplayedMonth = new DateTime()
                 .withTimeAtStartOfDay(); // Display current month on app start
-        today = new DateTime().withTimeAtStartOfDay();
+        mToday = new DateTime().withTimeAtStartOfDay();
 
         getEvents();
     }
@@ -80,10 +80,10 @@ public class MainActivity extends AppCompatActivity {
     public boolean onOptionsItemSelected(MenuItem item) {
         switch (item.getItemId()) {
             case R.id.action_prev_month:
-                displayedMonth = displayedMonth.minusMonths(1);
+                mDisplayedMonth = mDisplayedMonth.minusMonths(1);
                 break;
             case R.id.action_next_month:
-                displayedMonth = displayedMonth.plusMonths(1);
+                mDisplayedMonth = mDisplayedMonth.plusMonths(1);
                 break;
         }
 
@@ -131,7 +131,7 @@ public class MainActivity extends AppCompatActivity {
                         try {
                             List<Event> allEvents = JsonUtils
                                     .jsonToEvents((JSONObject) response);
-                            mappedEvents = EventUtils.getMappedEvents(allEvents);
+                            mMappedEvents = EventUtils.getMappedEvents(allEvents);
                             buildCalendar();
                         } catch (JSONException e) {
                             e.printStackTrace();
@@ -145,7 +145,7 @@ public class MainActivity extends AppCompatActivity {
         weeksContainer.removeAllViews();
 
         DateTimeFormatter formatter = DateTimeFormat.forPattern("MMMM Y");
-        setTitle(formatter.print(displayedMonth));
+        setTitle(formatter.print(mDisplayedMonth));
 
         LinearLayout[] weeks = new LinearLayout[NUM_WEEKS_DISPLAYED];
 
@@ -171,11 +171,11 @@ public class MainActivity extends AppCompatActivity {
         }
 
         // Populate last month's final dates if space available
-        int prevMonthTotalDays = displayedMonth.minusMonths(1).dayOfMonth().getMaximumValue();
-        int curMonthTotalDays = displayedMonth.dayOfMonth().getMaximumValue();
-        int firstDayOfCurMonth = displayedMonth.withDayOfMonth(1).dayOfWeek().get();
+        int prevMonthTotalDays = mDisplayedMonth.minusMonths(1).dayOfMonth().getMaximumValue();
+        int curMonthTotalDays = mDisplayedMonth.dayOfMonth().getMaximumValue();
+        int firstDayOfCurMonth = mDisplayedMonth.withDayOfMonth(1).dayOfWeek().get();
 
-        DateTime prevMonth = displayedMonth.minusMonths(1);
+        DateTime prevMonth = mDisplayedMonth.minusMonths(1);
         if (firstDayOfCurMonth != 7) {
             for (int i = firstDayOfCurMonth - 1; i >= 0; i--) {
                 LinearLayout dateBox = createDateBoxView(
@@ -193,7 +193,7 @@ public class MainActivity extends AppCompatActivity {
                 curWeekRow++;
             }
 
-            LinearLayout dateBox = createDateBoxView(displayedMonth.withDayOfMonth(date));
+            LinearLayout dateBox = createDateBoxView(mDisplayedMonth.withDayOfMonth(date));
             weeks[curWeekRow].addView(dateBox);
 
             curDayOfWeek++;
@@ -203,7 +203,7 @@ public class MainActivity extends AppCompatActivity {
         }
 
         // Populate next month's starting dates if space available
-        DateTime nextMonth = displayedMonth.plusMonths(1).withDayOfMonth(1);
+        DateTime nextMonth = mDisplayedMonth.plusMonths(1).withDayOfMonth(1);
 
         for (int week = curWeekRow; week < NUM_WEEKS_DISPLAYED; ) {
             LinearLayout finalWeek = weeks[week];
@@ -235,8 +235,8 @@ public class MainActivity extends AppCompatActivity {
         dateBox.addView(createDateTextView(date));
 
         List<Event> eventsOfTheDay = new ArrayList<>();
-        if (mappedEvents.containsKey(date)) {
-            eventsOfTheDay = mappedEvents.get(date);
+        if (mMappedEvents.containsKey(date)) {
+            eventsOfTheDay = mMappedEvents.get(date);
         }
         dateBox.addView(createEventsScrollView(eventsOfTheDay));
 
@@ -262,11 +262,11 @@ public class MainActivity extends AppCompatActivity {
         dtv.setLayoutParams(params);
 
         // Highlight today's date, darken selected month's dates, lighten preceding/following dates
-        if (date.equals(today)) {
+        if (date.equals(mToday)) {
             dtv.setTextColor(getResources().getColor(R.color.colorDateHighlight));
             dtv.setTypeface(null, Typeface.BOLD);
             dtv.setPaintFlags(dtv.getPaintFlags() | Paint.UNDERLINE_TEXT_FLAG);
-        } else if (date.monthOfYear().equals(displayedMonth.monthOfYear())) {
+        } else if (date.monthOfYear().equals(mDisplayedMonth.monthOfYear())) {
             dtv.setTextColor(Color.BLACK);
         } else {
             dtv.setTextColor(Color.GRAY);

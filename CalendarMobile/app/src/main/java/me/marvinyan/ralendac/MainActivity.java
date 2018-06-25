@@ -9,6 +9,7 @@ import android.os.Bundle;
 import android.support.annotation.Nullable;
 import android.support.v4.content.ContextCompat;
 import android.support.v7.app.AppCompatActivity;
+import android.util.Log;
 import android.util.TypedValue;
 import android.view.Gravity;
 import android.view.Menu;
@@ -32,6 +33,7 @@ import me.marvinyan.ralendac.utilities.NetworkUtils;
 import me.marvinyan.ralendac.utilities.VolleyResponseListener;
 import me.marvinyan.ralendac.utilities.VolleyUtils;
 import org.joda.time.DateTime;
+import org.joda.time.DateTimeConstants;
 import org.joda.time.format.DateTimeFormat;
 import org.joda.time.format.DateTimeFormatter;
 import org.json.JSONException;
@@ -40,11 +42,11 @@ import org.json.JSONObject;
 public class MainActivity extends AppCompatActivity {
 
     public static final int EVENT_REQUEST_CODE = 1;
-    public static final int NUM_WEEKS_DISPLAYED = 6;
 
     private DateTime mDisplayedMonth;
     private DateTime mToday;
     private Map<DateTime, List<Event>> mMappedEvents;
+    private int mMaxWeeksInMonth;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -52,6 +54,7 @@ public class MainActivity extends AppCompatActivity {
         setContentView(R.layout.activity_main);
 
         mDisplayedMonth = new DateTime()
+                .withDayOfMonth(1)
                 .withTimeAtStartOfDay(); // Display current month on app start
         mToday = new DateTime().withTimeAtStartOfDay();
 
@@ -140,17 +143,45 @@ public class MainActivity extends AppCompatActivity {
                 });
     }
 
+    // Feb 1 starts on a Sunday = 4 weeks
+    //
+    // 30 day month starts on Sunday = 6 weeks
+    // 31 day month starts on Saturday/Sunday = 6 weeks
+    // All other months = 5 weeks
+    private void getNumWeeksToDisplay() {
+        int daysInDisplayedMonth = mDisplayedMonth.dayOfMonth().getMaximumValue();
+        int dayOfWeek = mDisplayedMonth.getDayOfWeek();
+        int monthOfYear = mDisplayedMonth.getMonthOfYear();
+
+        mMaxWeeksInMonth = 5;
+
+        if (monthOfYear == DateTimeConstants.FEBRUARY) {
+            if (daysInDisplayedMonth == 28 && dayOfWeek == DateTimeConstants.SUNDAY) {
+                mMaxWeeksInMonth = 4;
+            }
+        } else if ((daysInDisplayedMonth == 30 && dayOfWeek == DateTimeConstants.SATURDAY)
+                || (daysInDisplayedMonth == 31 && (dayOfWeek == DateTimeConstants.FRIDAY
+                || dayOfWeek == DateTimeConstants.SATURDAY))) {
+            mMaxWeeksInMonth = 6;
+        }
+
+        Log.wtf("weeks", String.valueOf(mMaxWeeksInMonth));
+    }
+
     private void buildCalendar() {
         LinearLayout weeksContainer = findViewById(R.id.layout_calendar_weeks);
         weeksContainer.removeAllViews();
 
+        getNumWeeksToDisplay();
+        weeksContainer.setWeightSum(mMaxWeeksInMonth);
+
         DateTimeFormatter formatter = DateTimeFormat.forPattern("MMMM Y");
         setTitle(formatter.print(mDisplayedMonth));
 
-        LinearLayout[] weeks = new LinearLayout[NUM_WEEKS_DISPLAYED];
+        LinearLayout[] weeks = new LinearLayout[mMaxWeeksInMonth];
 
         // Build rows representing weeks
-        for (int i = 0; i < NUM_WEEKS_DISPLAYED; i++) {
+        for (int i = 0; i < mMaxWeeksInMonth; i++) {
             LinearLayout week = new LinearLayout(MainActivity.this);
             LinearLayout.LayoutParams params = new LinearLayout.LayoutParams(
                     LayoutParams.MATCH_PARENT,
@@ -205,7 +236,7 @@ public class MainActivity extends AppCompatActivity {
         // Populate next month's starting dates if space available
         DateTime nextMonth = mDisplayedMonth.plusMonths(1).withDayOfMonth(1);
 
-        for (int week = curWeekRow; week < NUM_WEEKS_DISPLAYED; ) {
+        for (int week = curWeekRow; week < mMaxWeeksInMonth; ) {
             LinearLayout finalWeek = weeks[week];
             if (finalWeek.getChildCount() == 7) {
                 week++;

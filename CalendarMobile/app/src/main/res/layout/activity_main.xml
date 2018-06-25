@@ -91,35 +91,6 @@
         android:id="@+id/layout_calendar_weeks"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:orientation="vertical"
-        android:weightSum="6">
+        android:orientation="vertical">
     </LinearLayout>
-    <!--<Button-->
-    <!--android:id="@+id/btn_new_event_activity"-->
-    <!--android:layout_width="wrap_content"-->
-    <!--android:layout_height="wrap_content"-->
-    <!--android:layout_gravity="center_horizontal"-->
-    <!--android:clickable="true"-->
-    <!--android:focusable="true"-->
-    <!--android:onClick="startNewEventActivity"-->
-    <!--android:text="New Event"/>-->
-
-    <!--<Button-->
-    <!--android:id="@+id/btn_edit_event_activity"-->
-    <!--android:layout_width="wrap_content"-->
-    <!--android:layout_height="wrap_content"-->
-    <!--android:layout_marginTop="15dp"-->
-    <!--android:layout_gravity="center_horizontal"-->
-    <!--android:clickable="true"-->
-    <!--android:focusable="true"-->
-    <!--android:onClick="startEditEventActivity"-->
-    <!--android:text="Edit Event"/>-->
-
-    <!--<TextView-->
-    <!--android:id="@+id/tv_json_log"-->
-    <!--android:layout_width="match_parent"-->
-    <!--android:layout_height="wrap_content"-->
-    <!--android:layout_margin="15dp"-->
-    <!--android:layout_gravity="center_horizontal"-->
-    <!--android:padding="10dp"/>-->
 </LinearLayout>

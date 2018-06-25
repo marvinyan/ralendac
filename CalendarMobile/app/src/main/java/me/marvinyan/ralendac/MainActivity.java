@@ -235,7 +235,7 @@ public class MainActivity extends AppCompatActivity {
         dateBox.addView(createDateTextView(date));
 
         List<Event> eventsOfTheDay = new ArrayList<>();
-        if (mMappedEvents.containsKey(date)) {
+        if (mMappedEvents != null && mMappedEvents.containsKey(date)) {
             eventsOfTheDay = mMappedEvents.get(date);
         }
         dateBox.addView(createEventsScrollView(eventsOfTheDay));

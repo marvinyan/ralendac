@@ -5,7 +5,7 @@ date_range = Date.new(2017, 1, 1)..Date.new(2019, 12, 31)
 zone = 'Eastern Time (US & Canada)'
 
 date_range.each do |date|
-    if rand() < 0.25
+    if rand() < 0.30
         Time.use_zone(zone) do
             rand(1..7).times do
                 descrip_len = rand(1..5)
@@ -20,7 +20,7 @@ date_range.each do |date|
                 end_time = [random_time_1, random_time_2].max.floor_to(15.minutes)
 
                 description = Faker::Lorem.words(descrip_len, true).join(' ').capitalize
-                Event.create({ description: description, start_time: start_time, end_time: end_time})
+                Event.create({ description: description, start_time: start_time, end_time: end_time })
             end
         end
     end

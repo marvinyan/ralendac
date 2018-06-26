@@ -58,6 +58,7 @@ public class MainActivity extends AppCompatActivity {
                 .withTimeAtStartOfDay(); // Display current month on app start
         mToday = new DateTime().withTimeAtStartOfDay();
 
+        findViewById(R.id.layout_progress_bar_calendar).setVisibility(View.VISIBLE);
         getEvents();
     }
 
@@ -124,6 +125,7 @@ public class MainActivity extends AppCompatActivity {
                 new VolleyResponseListener() {
                     @Override
                     public void onError(String message) {
+                        findViewById(R.id.layout_progress_bar_calendar).setVisibility(View.GONE);
                         Toast.makeText(MainActivity.this, "Unable to connect to server",
                                 Toast.LENGTH_LONG)
                                 .show();
@@ -131,6 +133,7 @@ public class MainActivity extends AppCompatActivity {
 
                     @Override
                     public void onResponse(Object response) {
+                        findViewById(R.id.layout_progress_bar_calendar).setVisibility(View.GONE);
                         try {
                             List<Event> allEvents = JsonUtils
                                     .jsonToEvents((JSONObject) response);

@@ -20,6 +20,7 @@ import com.android.volley.Request.Method;
 import java.util.HashMap;
 import java.util.Locale;
 import java.util.Map;
+import me.marvinyan.ralendac.models.Event;
 import me.marvinyan.ralendac.utilities.NetworkUtils;
 import me.marvinyan.ralendac.utilities.VolleyResponseListener;
 import me.marvinyan.ralendac.utilities.VolleyUtils;
@@ -86,11 +87,8 @@ public class EventActivity extends AppCompatActivity {
         MenuInflater menuInflater = getMenuInflater();
         menuInflater.inflate(R.menu.event, menu);
 
-        // Show delete option only if editing
-        Intent parentIntent = getIntent();
         MenuItem deleteBtn = menu.findItem(R.id.action_delete);
-
-        if (parentIntent.hasExtra("eventId")) {
+        if (mEventId != -1) {
             deleteBtn.setVisible(true);
         }
 
@@ -221,12 +219,14 @@ public class EventActivity extends AppCompatActivity {
         // Editing event:
         //      - Restore all fields
         Intent parentIntent = getIntent();
-        mEventId = parentIntent.getIntExtra("eventId", -1);
 
-        if (parentIntent.hasExtra("eventId")) {
-            mDescriptionEditText.setText(parentIntent.getStringExtra("description"));
-            mStartTime = (DateTime) parentIntent.getSerializableExtra("startTime");
-            mEndTime = (DateTime) parentIntent.getSerializableExtra("endTime");
+        if (parentIntent.hasExtra("eventToEdit")) {
+            Event eventToEdit = parentIntent.getParcelableExtra("eventToEdit");
+
+            mEventId = eventToEdit.getId();
+            mDescriptionEditText.setText(eventToEdit.getDescription());
+            mStartTime = eventToEdit.getStartTime();
+            mEndTime = eventToEdit.getEndTime();
             mSelectedDate =
                     new DateTime(
                             mStartTime.getYear(), mStartTime.getMonthOfYear(),
@@ -235,6 +235,7 @@ public class EventActivity extends AppCompatActivity {
             // Creating new event:
             //      - Set start time to selected date with current time.
             //      - Set end time to the lesser of 1 hour after start time or 11:59pm.
+            mEventId = -1;
             LocalTime now = new LocalTime();
             mSelectedDate = (DateTime) parentIntent.getSerializableExtra("selectedDate");
             mStartTime =

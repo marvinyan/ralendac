@@ -101,18 +101,13 @@ public class MainActivity extends AppCompatActivity {
         Intent eventActivityIntent = new Intent(MainActivity.this, EventActivity.class);
 
         eventActivityIntent.putExtra("selectedDate", selectedDate);
-
         startActivityForResult(eventActivityIntent, EVENT_REQUEST_CODE);
     }
 
     public void startEditEventActivity(Event selectedEvent) {
         Intent eventActivityIntent = new Intent(MainActivity.this, EventActivity.class);
 
-        eventActivityIntent.putExtra("eventId", selectedEvent.getId());
-        eventActivityIntent.putExtra("description", selectedEvent.getDescription());
-        eventActivityIntent.putExtra("startTime", selectedEvent.getStartTime());
-        eventActivityIntent.putExtra("endTime", selectedEvent.getEndTime());
-
+        eventActivityIntent.putExtra("eventToEdit", selectedEvent);
         startActivityForResult(eventActivityIntent, EVENT_REQUEST_CODE);
     }
 
@@ -147,9 +142,8 @@ public class MainActivity extends AppCompatActivity {
     }
 
     // Feb 1 starts on a Sunday = 4 weeks
-    //
-    // 30 day month starts on Sunday = 6 weeks
-    // 31 day month starts on Saturday/Sunday = 6 weeks
+    // 30 day month starts on Sat = 6 weeks
+    // 31 day month starts on Fri/Sat = 6 weeks
     // All other months = 5 weeks
     private void getNumWeeksToDisplay() {
         int daysInDisplayedMonth = mDisplayedMonth.dayOfMonth().getMaximumValue();

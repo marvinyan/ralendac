@@ -1,14 +1,24 @@
-package me.marvinyan.ralendac.models;
+package me.marvinyan.ralendac.model;
 
 import android.os.Parcel;
 import android.os.Parcelable;
+import com.google.gson.annotations.Expose;
+import com.google.gson.annotations.SerializedName;
 import org.joda.time.DateTime;
 
 public class Event implements Parcelable {
 
+    @SerializedName("id")
+    @Expose
     private int id;
+    @SerializedName("description")
+    @Expose
     private String description;
+    @SerializedName("start_time")
+    @Expose
     private DateTime startTime;
+    @SerializedName("end_time")
+    @Expose
     private DateTime endTime;
 
     public Event(int id, String description, DateTime startTime, DateTime endTime) {

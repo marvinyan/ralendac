@@ -1,9 +1,9 @@
-package me.marvinyan.ralendac.utilities;
+package me.marvinyan.ralendac.util;
 
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
-import me.marvinyan.ralendac.models.Event;
+import me.marvinyan.ralendac.model.Event;
 import org.joda.time.DateTime;
 import org.joda.time.DateTimeZone;
 import org.json.JSONArray;

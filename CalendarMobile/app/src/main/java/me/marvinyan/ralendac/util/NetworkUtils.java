@@ -1,4 +1,4 @@
-package me.marvinyan.ralendac.utilities;
+package me.marvinyan.ralendac.util;
 
 import android.net.Uri;
 import java.net.MalformedURLException;

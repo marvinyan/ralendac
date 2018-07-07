@@ -34,6 +34,7 @@ public class RetrofitClient {
         return retrofit;
     }
 
+    // Without this, start_time and end_time cannot be deserialized.
     private static class DateTimeTypeConverter implements JsonSerializer<DateTime>,
             JsonDeserializer<DateTime> {
 

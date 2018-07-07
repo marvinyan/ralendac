@@ -128,7 +128,7 @@ public class MainActivity extends AppCompatActivity {
             @Override
             public void onFailure(Call<Events> call, Throwable t) {
                 findViewById(R.id.layout_progress_bar_calendar).setVisibility(View.GONE);
-                Toast.makeText(MainActivity.this, "Unable to connect to server" + t.getLocalizedMessage(),
+                Toast.makeText(MainActivity.this, "Unable to connect to server",
                         Toast.LENGTH_LONG)
                         .show();
             }

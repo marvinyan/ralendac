@@ -16,20 +16,18 @@ import android.widget.EditText;
 import android.widget.TextView;
 import android.widget.TimePicker;
 import android.widget.Toast;
-import com.android.volley.Request.Method;
-import java.util.HashMap;
 import java.util.Locale;
-import java.util.Map;
 import me.marvinyan.ralendac.model.Event;
-import me.marvinyan.ralendac.util.NetworkUtils;
-import me.marvinyan.ralendac.util.VolleyResponseListener;
-import me.marvinyan.ralendac.util.VolleyUtils;
+import me.marvinyan.ralendac.net.ApiUtils;
+import me.marvinyan.ralendac.net.EventService;
 import org.joda.time.DateTime;
 import org.joda.time.DateTimeZone;
 import org.joda.time.LocalTime;
 import org.joda.time.format.DateTimeFormat;
 import org.joda.time.format.DateTimeFormatter;
-import org.json.JSONException;
+import retrofit2.Call;
+import retrofit2.Callback;
+import retrofit2.Response;
 
 public class EventActivity extends AppCompatActivity {
 
@@ -41,6 +39,8 @@ public class EventActivity extends AppCompatActivity {
     private DateTime mStartTime;
     private DateTime mEndTime;
     private int mEventId;
+
+    private EventService eventService = ApiUtils.getEventService();
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -108,10 +108,14 @@ public class EventActivity extends AppCompatActivity {
                             Toast.LENGTH_LONG)
                             .show();
                 } else {
+                    DateTime startTime = mStartTime.toDateTime(DateTimeZone.UTC);
+                    DateTime endTime = mEndTime.toDateTime(DateTimeZone.UTC);
+                    Event event = new Event(mEventId, description, startTime, endTime);
+
                     if (mEventId == -1) {
-                        createEvent();
+                        createEvent(event);
                     } else {
-                        editEvent();
+                        editEvent(event);
                     }
                 }
                 break;
@@ -282,71 +286,47 @@ public class EventActivity extends AppCompatActivity {
                 && !mEndTime.isBefore(mStartTime);
     }
 
-    private void createEvent() {
-        String eventsUrlStr = NetworkUtils.buildEventUrl(null).toString();
-        sendVolleyRequest(Method.POST, eventsUrlStr);
+    private void createEvent(Event event) {
+        sendRequest(eventService.createEvent(event));
     }
 
-    private void editEvent() {
-        String eventsUrlStr = NetworkUtils.buildEventUrl(String.valueOf(mEventId)).toString();
-        sendVolleyRequest(Method.PUT, eventsUrlStr);
+    private void editEvent(Event event) {
+        sendRequest(eventService.updateEvent(mEventId, event));
     }
 
     private void deleteEvent() {
-        String eventsUrlStr = NetworkUtils.buildEventUrl(String.valueOf(mEventId)).toString();
-        sendVolleyRequest(Method.DELETE, eventsUrlStr);
+        sendRequest(eventService.deleteEvent(mEventId));
     }
 
-    private void sendVolleyRequest(final int method, String urlStr) {
-        Map<String, String> params = makeParamsMap();
+    private void sendRequest(Call<Event> call) {
+        call.enqueue(new Callback<Event>() {
+            @Override
+            public void onResponse(Call<Event> call, Response<Event> response) {
+                String toastMsg = "";
+                switch (call.request().method()) {
+                    case "POST":
+                        toastMsg = "Event was created successfully";
+                        break;
+                    case "PUT":
+                        toastMsg = "Event was updated successfully";
+                        break;
+                    case "DELETE":
+                        toastMsg = "Event was deleted successfully";
+                        break;
+                }
+                Toast.makeText(EventActivity.this, toastMsg, Toast.LENGTH_LONG).show();
 
-        try {
-            VolleyUtils.requestWithParams(
-                    EventActivity.this,
-                    urlStr,
-                    method,
-                    params,
-                    new VolleyResponseListener() {
-                        @Override
-                        public void onError(String message) {
-                            Toast.makeText(EventActivity.this, "Status code: " + message,
-                                    Toast.LENGTH_LONG)
-                                    .show();
-                        }
+                Intent resultIntent = new Intent();
+                setResult(Activity.RESULT_OK, resultIntent);
+                finish();
+            }
 
-                        @Override
-                        public void onResponse(Object response) {
-                            String toastMsg = "";
-                            switch (method) {
-                                case Method.POST:
-                                    toastMsg = "Event was created successfully";
-                                    break;
-                                case Method.PUT:
-                                    toastMsg = "Event was updated successfully";
-                                    break;
-                                case Method.DELETE:
-                                    toastMsg = "Event was deleted successfully";
-                                    break;
-                            }
-
-                            Toast.makeText(EventActivity.this, toastMsg, Toast.LENGTH_LONG).show();
-                            Intent resultIntent = new Intent();
-                            setResult(Activity.RESULT_OK, resultIntent);
-                            finish();
-                        }
-                    });
-        } catch (JSONException e) {
-            Toast.makeText(EventActivity.this, "Unable to send request", Toast.LENGTH_LONG).show();
-        }
-    }
-
-    private Map<String, String> makeParamsMap() {
-        Map<String, String> params = new HashMap<>();
-
-        params.put("description", mDescriptionEditText.getText().toString());
-        params.put("start_time", mStartTime.toDateTime(DateTimeZone.UTC).toString());
-        params.put("end_time", mEndTime.toDateTime(DateTimeZone.UTC).toString());
-
-        return params;
+            @Override
+            public void onFailure(Call<Event> call, Throwable t) {
+                Toast.makeText(EventActivity.this, "An error occurred: " + t.getMessage(),
+                        Toast.LENGTH_LONG)
+                        .show();
+            }
+        });
     }
 }

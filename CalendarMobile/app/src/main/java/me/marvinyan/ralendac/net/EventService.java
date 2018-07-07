@@ -1,4 +1,4 @@
-package me.marvinyan.ralendac.service;
+package me.marvinyan.ralendac.net;
 
 import me.marvinyan.ralendac.model.Event;
 import me.marvinyan.ralendac.model.Events;
@@ -10,7 +10,8 @@ import retrofit2.http.POST;
 import retrofit2.http.PUT;
 import retrofit2.http.Path;
 
-public interface EventsApi {
+public interface EventService {
+
     @GET("events")
     Call<Events> getEvents();
 

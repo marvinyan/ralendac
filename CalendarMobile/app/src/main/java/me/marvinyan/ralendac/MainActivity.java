@@ -22,22 +22,20 @@ import android.widget.LinearLayout.LayoutParams;
 import android.widget.ScrollView;
 import android.widget.TextView;
 import android.widget.Toast;
-import com.android.volley.Request.Method;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import me.marvinyan.ralendac.model.Event;
+import me.marvinyan.ralendac.model.Events;
+import me.marvinyan.ralendac.net.ApiUtils;
 import me.marvinyan.ralendac.util.EventUtils;
-import me.marvinyan.ralendac.util.JsonUtils;
-import me.marvinyan.ralendac.util.NetworkUtils;
-import me.marvinyan.ralendac.util.VolleyResponseListener;
-import me.marvinyan.ralendac.util.VolleyUtils;
 import org.joda.time.DateTime;
 import org.joda.time.DateTimeConstants;
 import org.joda.time.format.DateTimeFormat;
 import org.joda.time.format.DateTimeFormatter;
-import org.json.JSONException;
-import org.json.JSONObject;
+import retrofit2.Call;
+import retrofit2.Callback;
+import retrofit2.Response;
 
 public class MainActivity extends AppCompatActivity {
 
@@ -112,33 +110,29 @@ public class MainActivity extends AppCompatActivity {
     }
 
     private void getEvents() {
-        String eventsUrlStr = NetworkUtils.buildEventUrl(null).toString();
-        VolleyUtils.requestWithoutParams(
-                MainActivity.this,
-                eventsUrlStr,
-                Method.GET,
-                new VolleyResponseListener() {
-                    @Override
-                    public void onError(String message) {
-                        findViewById(R.id.layout_progress_bar_calendar).setVisibility(View.GONE);
-                        Toast.makeText(MainActivity.this, "Unable to connect to server",
-                                Toast.LENGTH_LONG)
-                                .show();
-                    }
+        Call<Events> call = ApiUtils.getEventService().getEvents();
+        call.enqueue(new Callback<Events>() {
+            @Override
+            public void onResponse(Call<Events> call, Response<Events> response) {
+                findViewById(R.id.layout_progress_bar_calendar).setVisibility(View.GONE);
 
-                    @Override
-                    public void onResponse(Object response) {
-                        findViewById(R.id.layout_progress_bar_calendar).setVisibility(View.GONE);
-                        try {
-                            List<Event> allEvents = JsonUtils
-                                    .jsonToEvents((JSONObject) response);
-                            mMappedEvents = EventUtils.getMappedEvents(allEvents);
-                            buildCalendar();
-                        } catch (JSONException e) {
-                            e.printStackTrace();
-                        }
-                    }
-                });
+                List<Event> allEvents = null;
+                if (response.body() != null) {
+                    allEvents = response.body().getEvents();
+                }
+
+                mMappedEvents = EventUtils.getMappedEvents(allEvents);
+                buildCalendar();
+            }
+
+            @Override
+            public void onFailure(Call<Events> call, Throwable t) {
+                findViewById(R.id.layout_progress_bar_calendar).setVisibility(View.GONE);
+                Toast.makeText(MainActivity.this, "Unable to connect to server" + t.getLocalizedMessage(),
+                        Toast.LENGTH_LONG)
+                        .show();
+            }
+        });
     }
 
     // Feb 1 starts on a Sunday = 4 weeks

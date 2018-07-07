@@ -8,6 +8,7 @@ import java.util.List;
     Helpful link: http://www.jsonschema2pojo.org/
  */
 public class Events {
+
     @SerializedName("events")
     @Expose
     private List<Event> events = null;

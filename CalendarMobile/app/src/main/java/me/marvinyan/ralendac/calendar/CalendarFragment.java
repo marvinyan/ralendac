@@ -1,4 +1,4 @@
-package me.marvinyan.ralendac;
+package me.marvinyan.ralendac.calendar;
 
 import android.app.Activity;
 import android.content.Intent;
@@ -6,174 +6,131 @@ import android.graphics.Color;
 import android.graphics.Paint;
 import android.graphics.Typeface;
 import android.os.Bundle;
+import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
+import android.support.v4.app.Fragment;
 import android.support.v4.content.ContextCompat;
-import android.support.v7.app.AppCompatActivity;
-import android.util.Log;
 import android.util.TypedValue;
 import android.view.Gravity;
-import android.view.Menu;
-import android.view.MenuInflater;
-import android.view.MenuItem;
+import android.view.LayoutInflater;
 import android.view.View;
 import android.view.View.OnClickListener;
+import android.view.ViewGroup;
 import android.widget.LinearLayout;
 import android.widget.LinearLayout.LayoutParams;
 import android.widget.ScrollView;
 import android.widget.TextView;
 import android.widget.Toast;
-import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
-import me.marvinyan.ralendac.model.Event;
-import me.marvinyan.ralendac.model.Events;
-import me.marvinyan.ralendac.net.ApiUtils;
-import me.marvinyan.ralendac.util.EventUtils;
+import me.marvinyan.ralendac.R;
+import me.marvinyan.ralendac.calendar.CalendarContract.Presenter;
+import me.marvinyan.ralendac.data.Event;
+import me.marvinyan.ralendac.events.EventActivity;
 import org.joda.time.DateTime;
 import org.joda.time.DateTimeConstants;
 import org.joda.time.format.DateTimeFormat;
 import org.joda.time.format.DateTimeFormatter;
-import retrofit2.Call;
-import retrofit2.Callback;
-import retrofit2.Response;
 
-public class MainActivity extends AppCompatActivity {
+public class CalendarFragment extends Fragment implements CalendarContract.View {
+
+    private CalendarContract.Presenter mPresenter;
 
     public static final int EVENT_REQUEST_CODE = 1;
 
     private DateTime mDisplayedMonth;
     private DateTime mToday;
-    private Map<DateTime, List<Event>> mMappedEvents;
     private int mMaxWeeksInMonth;
+    private LinearLayout[] mWeekLayouts;
 
-    @Override
-    protected void onCreate(Bundle savedInstanceState) {
-        super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_main);
-
-        mDisplayedMonth = new DateTime()
-                .withDayOfMonth(1)
-                .withTimeAtStartOfDay(); // Display current month on app start
-        mToday = new DateTime().withTimeAtStartOfDay();
-
-        findViewById(R.id.layout_progress_bar_calendar).setVisibility(View.VISIBLE);
-        getEvents();
+    public CalendarFragment() {
     }
 
     @Override
-    protected void onActivityResult(int requestCode, int resultCode, @Nullable Intent data) {
+    public void onCreate(@Nullable Bundle savedInstanceState) {
+        super.onCreate(savedInstanceState);
+        mToday = new DateTime().withTimeAtStartOfDay();
+        mDisplayedMonth = new DateTime()
+                .withDayOfMonth(1)
+                .withTimeAtStartOfDay();
+    }
+
+    @Nullable
+    @Override
+    public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container,
+            @Nullable Bundle savedInstanceState) {
+        View root = inflater.inflate(R.layout.fragment_calendar, container, false);
+        return root;
+    }
+
+    @Override
+    public void onResume() {
+        super.onResume();
+        mPresenter.refreshCalendar(mDisplayedMonth);
+    }
+
+    @Override
+    public void onActivityResult(int requestCode, int resultCode, @Nullable Intent data) {
         super.onActivityResult(requestCode, resultCode, data);
 
         // Refetch events if an event was created, edited, or deleted.
         // TODO: Save an API call by just updating allEvents with return result of EventActivity
         if (requestCode == EVENT_REQUEST_CODE && resultCode == Activity.RESULT_OK) {
-            getEvents();
+            mPresenter.loadEvents();
         }
     }
 
     @Override
-    public boolean onCreateOptionsMenu(Menu menu) {
-        MenuInflater menuInflater = getMenuInflater();
-        menuInflater.inflate(R.menu.main, menu);
-        return true;
+    public void setPresenter(Presenter presenter) {
+        mPresenter = presenter;
     }
 
     @Override
-    public boolean onOptionsItemSelected(MenuItem item) {
-        switch (item.getItemId()) {
-            case R.id.action_prev_month:
-                mDisplayedMonth = mDisplayedMonth.minusMonths(1);
-                break;
-            case R.id.action_next_month:
-                mDisplayedMonth = mDisplayedMonth.plusMonths(1);
-                break;
-        }
-
-        buildCalendar();
-
-        return super.onOptionsItemSelected(item);
-    }
-
-
-    public void startNewEventActivity(DateTime selectedDate) {
-        Intent eventActivityIntent = new Intent(MainActivity.this, EventActivity.class);
+    public void showNewEventUi(DateTime selectedDate) {
+        Intent eventActivityIntent = new Intent(getContext(), EventActivity.class);
 
         eventActivityIntent.putExtra("selectedDate", selectedDate);
         startActivityForResult(eventActivityIntent, EVENT_REQUEST_CODE);
     }
 
-    public void startEditEventActivity(Event selectedEvent) {
-        Intent eventActivityIntent = new Intent(MainActivity.this, EventActivity.class);
+    @Override
+    public void showEditEventUi(Event selectedEvent) {
+        Intent eventActivityIntent = new Intent(getContext(), EventActivity.class);
 
         eventActivityIntent.putExtra("eventToEdit", selectedEvent);
         startActivityForResult(eventActivityIntent, EVENT_REQUEST_CODE);
     }
 
-    private void getEvents() {
-        Call<Events> call = ApiUtils.getEventService().getEvents();
-        call.enqueue(new Callback<Events>() {
-            @Override
-            public void onResponse(Call<Events> call, Response<Events> response) {
-                findViewById(R.id.layout_progress_bar_calendar).setVisibility(View.GONE);
-
-                List<Event> allEvents = null;
-                if (response.body() != null) {
-                    allEvents = response.body().getEvents();
-                }
-
-                mMappedEvents = EventUtils.getMappedEvents(allEvents);
-                buildCalendar();
-            }
-
-            @Override
-            public void onFailure(Call<Events> call, Throwable t) {
-                findViewById(R.id.layout_progress_bar_calendar).setVisibility(View.GONE);
-                Toast.makeText(MainActivity.this, "Unable to connect to server",
-                        Toast.LENGTH_LONG)
-                        .show();
-            }
-        });
-    }
-
-    // Feb 1 starts on a Sunday = 4 weeks
-    // 30 day month starts on Sat = 6 weeks
-    // 31 day month starts on Fri/Sat = 6 weeks
-    // All other months = 5 weeks
-    private void getNumWeeksToDisplay() {
-        int daysInDisplayedMonth = mDisplayedMonth.dayOfMonth().getMaximumValue();
-        int dayOfWeek = mDisplayedMonth.getDayOfWeek();
-        int monthOfYear = mDisplayedMonth.getMonthOfYear();
-
-        mMaxWeeksInMonth = 5;
-
-        if (monthOfYear == DateTimeConstants.FEBRUARY) {
-            if (daysInDisplayedMonth == 28 && dayOfWeek == DateTimeConstants.SUNDAY) {
-                mMaxWeeksInMonth = 4;
-            }
-        } else if ((daysInDisplayedMonth == 30 && dayOfWeek == DateTimeConstants.SATURDAY)
-                || (daysInDisplayedMonth == 31 && (dayOfWeek == DateTimeConstants.FRIDAY
-                || dayOfWeek == DateTimeConstants.SATURDAY))) {
-            mMaxWeeksInMonth = 6;
+    @Override
+    public void showLoadingIndicator(boolean active) {
+        if (getView() == null) {
+            return;
         }
 
-        Log.wtf("weeks", String.valueOf(mMaxWeeksInMonth));
+        if (active) {
+            getView().findViewById(R.id.layout_progress_bar_calendar).setVisibility(View.VISIBLE);
+        } else {
+            getView().findViewById(R.id.layout_progress_bar_calendar).setVisibility(View.GONE);
+        }
     }
 
-    private void buildCalendar() {
-        LinearLayout weeksContainer = findViewById(R.id.layout_calendar_weeks);
-        weeksContainer.removeAllViews();
-
+    @Override
+    public void buildCalendar(DateTime displayedMonth) {
+        mDisplayedMonth = displayedMonth;
         getNumWeeksToDisplay();
+
+        LinearLayout weeksContainer = getView().findViewById(R.id.layout_calendar_weeks);
+        weeksContainer.removeAllViews();
         weeksContainer.setWeightSum(mMaxWeeksInMonth);
 
         DateTimeFormatter formatter = DateTimeFormat.forPattern("MMMM Y");
-        setTitle(formatter.print(mDisplayedMonth));
+        getActivity().setTitle(formatter.print(mDisplayedMonth));
 
-        LinearLayout[] weeks = new LinearLayout[mMaxWeeksInMonth];
+        mWeekLayouts = new LinearLayout[mMaxWeeksInMonth];
 
         // Build rows representing weeks
         for (int i = 0; i < mMaxWeeksInMonth; i++) {
-            LinearLayout week = new LinearLayout(MainActivity.this);
+            LinearLayout week = new LinearLayout(getContext());
             LinearLayout.LayoutParams params = new LinearLayout.LayoutParams(
                     LayoutParams.MATCH_PARENT,
                     0,
@@ -186,9 +143,9 @@ public class MainActivity extends AppCompatActivity {
             week.setWeightSum(7);
             week.setLayoutParams(params);
             week.setBackgroundDrawable(
-                    ContextCompat.getDrawable(MainActivity.this, R.drawable.border_bottom_gray));
+                    ContextCompat.getDrawable(getContext(), R.drawable.border_bottom_gray));
 
-            weeks[i] = week;
+            mWeekLayouts[i] = week;
             weeksContainer.addView(week);
         }
 
@@ -202,7 +159,7 @@ public class MainActivity extends AppCompatActivity {
             for (int i = firstDayOfCurMonth - 1; i >= 0; i--) {
                 LinearLayout dateBox = createDateBoxView(
                         prevMonth.withDayOfMonth(prevMonthTotalDays - i));
-                weeks[0].addView(dateBox);
+                mWeekLayouts[0].addView(dateBox);
             }
         }
 
@@ -216,7 +173,7 @@ public class MainActivity extends AppCompatActivity {
             }
 
             LinearLayout dateBox = createDateBoxView(mDisplayedMonth.withDayOfMonth(date));
-            weeks[curWeekRow].addView(dateBox);
+            mWeekLayouts[curWeekRow].addView(dateBox);
 
             curDayOfWeek++;
             if (curDayOfWeek == 8) {
@@ -228,7 +185,7 @@ public class MainActivity extends AppCompatActivity {
         DateTime nextMonth = mDisplayedMonth.plusMonths(1).withDayOfMonth(1);
 
         for (int week = curWeekRow; week < mMaxWeeksInMonth; ) {
-            LinearLayout finalWeek = weeks[week];
+            LinearLayout finalWeek = mWeekLayouts[week];
             if (finalWeek.getChildCount() == 7) {
                 week++;
             } else {
@@ -238,9 +195,45 @@ public class MainActivity extends AppCompatActivity {
         }
     }
 
+    @Override
+    public void showBadConnectionMessage() {
+        Toast.makeText(getContext(), "Unable to connect to server",
+                Toast.LENGTH_LONG)
+                .show();
+    }
+
+    @Override
+    public void showEvents(Map<DateTime, List<Event>> mappedEvents) {
+        for (LinearLayout weekLayout : mWeekLayouts) {
+            for (int i = 0; i < weekLayout.getChildCount(); i++) {
+                LinearLayout dateBox = (LinearLayout) weekLayout.getChildAt(i);
+
+                // Clear previous events
+                if (dateBox.getChildCount() > 1) {
+                    dateBox.removeViewAt(1);
+                }
+
+                dateBox.setOnClickListener(new OnClickListener() {
+                    @Override
+                    public void onClick(View view) {
+                        showNewEventUi((DateTime) view.getTag());
+                    }
+                });
+
+                DateTime curDate = (DateTime) dateBox.getTag();
+                List<Event> eventsOfTheDay;
+                if (mappedEvents != null && mappedEvents.containsKey(curDate)) {
+                    eventsOfTheDay = mappedEvents.get(curDate);
+
+                    dateBox.addView(createEventsScrollView(eventsOfTheDay));
+                }
+            }
+        }
+    }
+
     // LinearLayout with a TextView as the date and ScrollView>LinearLayout>TextViews for events
     private LinearLayout createDateBoxView(DateTime date) {
-        LinearLayout dateBox = new LinearLayout(MainActivity.this);
+        LinearLayout dateBox = new LinearLayout(getContext());
         LinearLayout.LayoutParams params = new LinearLayout.LayoutParams(
                 0,
                 LayoutParams.MATCH_PARENT,
@@ -256,25 +249,11 @@ public class MainActivity extends AppCompatActivity {
         dateBox.setOrientation(LinearLayout.VERTICAL);
         dateBox.addView(createDateTextView(date));
 
-        List<Event> eventsOfTheDay = new ArrayList<>();
-        if (mMappedEvents != null && mMappedEvents.containsKey(date)) {
-            eventsOfTheDay = mMappedEvents.get(date);
-        }
-        dateBox.addView(createEventsScrollView(eventsOfTheDay));
-
-        // Create new event trigger
-        dateBox.setOnClickListener(new OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                startNewEventActivity((DateTime) view.getTag());
-            }
-        });
-
         return dateBox;
     }
 
     private TextView createDateTextView(DateTime date) {
-        TextView dtv = new TextView(MainActivity.this);
+        TextView dtv = new TextView(getContext());
         LinearLayout.LayoutParams params = new LinearLayout.LayoutParams(LayoutParams.WRAP_CONTENT,
                 LayoutParams.WRAP_CONTENT);
 
@@ -298,8 +277,8 @@ public class MainActivity extends AppCompatActivity {
     }
 
     private ScrollView createEventsScrollView(List<Event> eventsOfTheDay) {
-        ScrollView eventsScrollView = new ScrollView(MainActivity.this);
-        LinearLayout eventList = new LinearLayout(MainActivity.this);
+        ScrollView eventsScrollView = new ScrollView(getContext());
+        LinearLayout eventList = new LinearLayout(getContext());
         LinearLayout.LayoutParams params = new LinearLayout.LayoutParams(LayoutParams.MATCH_PARENT,
                 LayoutParams.WRAP_CONTENT);
 
@@ -315,7 +294,7 @@ public class MainActivity extends AppCompatActivity {
     }
 
     private TextView createEventTextView(final Event event) {
-        TextView dtv = new TextView(MainActivity.this);
+        TextView dtv = new TextView(getContext());
         LinearLayout.LayoutParams params = new LinearLayout.LayoutParams(LayoutParams.MATCH_PARENT,
                 LayoutParams.WRAP_CONTENT);
 
@@ -323,7 +302,7 @@ public class MainActivity extends AppCompatActivity {
         params.setMargins(0, marginTop, 0, 0);
 
         dtv.setBackgroundDrawable(
-                ContextCompat.getDrawable(MainActivity.this, R.drawable.background_rounded_event));
+                ContextCompat.getDrawable(getContext(), R.drawable.background_rounded_event));
         dtv.setTextColor(Color.WHITE);
         int padding = getResources().getDimensionPixelSize(R.dimen.padding_event);
         dtv.setPadding(padding, padding, padding, padding);
@@ -339,9 +318,32 @@ public class MainActivity extends AppCompatActivity {
         dtv.setOnClickListener(new OnClickListener() {
             @Override
             public void onClick(View view) {
-                startEditEventActivity(event);
+                showEditEventUi(event);
             }
         });
         return dtv;
+    }
+
+
+    // Feb 1 starts on a Sunday = 4 weeks
+    // 30 day month starts on Sat = 6 weeks
+    // 31 day month starts on Fri/Sat = 6 weeks
+    // All other months = 5 weeks
+    private void getNumWeeksToDisplay() {
+        int daysInDisplayedMonth = mDisplayedMonth.dayOfMonth().getMaximumValue();
+        int dayOfWeek = mDisplayedMonth.getDayOfWeek();
+        int monthOfYear = mDisplayedMonth.getMonthOfYear();
+
+        mMaxWeeksInMonth = 5;
+
+        if (monthOfYear == DateTimeConstants.FEBRUARY) {
+            if (daysInDisplayedMonth == 28 && dayOfWeek == DateTimeConstants.SUNDAY) {
+                mMaxWeeksInMonth = 4;
+            }
+        } else if ((daysInDisplayedMonth == 30 && dayOfWeek == DateTimeConstants.SATURDAY)
+                || (daysInDisplayedMonth == 31 && (dayOfWeek == DateTimeConstants.FRIDAY
+                || dayOfWeek == DateTimeConstants.SATURDAY))) {
+            mMaxWeeksInMonth = 6;
+        }
     }
 }

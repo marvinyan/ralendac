@@ -1,7 +1,7 @@
-package me.marvinyan.ralendac.net;
+package me.marvinyan.ralendac.util.network;
 
-import me.marvinyan.ralendac.model.Event;
-import me.marvinyan.ralendac.model.Events;
+import me.marvinyan.ralendac.data.Event;
+import me.marvinyan.ralendac.data.Events;
 import retrofit2.Call;
 import retrofit2.http.Body;
 import retrofit2.http.DELETE;

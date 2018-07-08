@@ -1,4 +1,4 @@
-package me.marvinyan.ralendac.model;
+package me.marvinyan.ralendac.data;
 
 import android.os.Parcel;
 import android.os.Parcelable;

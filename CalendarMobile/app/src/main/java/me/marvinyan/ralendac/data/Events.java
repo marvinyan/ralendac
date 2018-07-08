@@ -1,4 +1,4 @@
-package me.marvinyan.ralendac.model;
+package me.marvinyan.ralendac.data;
 
 import com.google.gson.annotations.Expose;
 import com.google.gson.annotations.SerializedName;

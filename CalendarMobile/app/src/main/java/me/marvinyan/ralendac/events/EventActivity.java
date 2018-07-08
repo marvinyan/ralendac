@@ -1,4 +1,4 @@
-package me.marvinyan.ralendac;
+package me.marvinyan.ralendac.events;
 
 import android.app.Activity;
 import android.app.TimePickerDialog;
@@ -17,9 +17,10 @@ import android.widget.TextView;
 import android.widget.TimePicker;
 import android.widget.Toast;
 import java.util.Locale;
-import me.marvinyan.ralendac.model.Event;
-import me.marvinyan.ralendac.net.ApiUtils;
-import me.marvinyan.ralendac.net.EventService;
+import me.marvinyan.ralendac.R;
+import me.marvinyan.ralendac.data.Event;
+import me.marvinyan.ralendac.util.network.ApiUtils;
+import me.marvinyan.ralendac.util.network.EventService;
 import org.joda.time.DateTime;
 import org.joda.time.DateTimeZone;
 import org.joda.time.LocalTime;
@@ -113,14 +114,14 @@ public class EventActivity extends AppCompatActivity {
                     Event event = new Event(mEventId, description, startTime, endTime);
 
                     if (mEventId == -1) {
-                        createEvent(event);
+                        sendRequest(eventService.createEvent(event));
                     } else {
-                        editEvent(event);
+                        sendRequest(eventService.updateEvent(mEventId, event));
                     }
                 }
                 break;
             case R.id.action_delete:
-                deleteEvent();
+                sendRequest(eventService.deleteEvent(mEventId));
                 break;
         }
 
@@ -284,18 +285,6 @@ public class EventActivity extends AppCompatActivity {
         // Ensure 1-day event and end time is >= start time
         return mStartTime.toLocalDate().isEqual(mEndTime.toLocalDate())
                 && !mEndTime.isBefore(mStartTime);
-    }
-
-    private void createEvent(Event event) {
-        sendRequest(eventService.createEvent(event));
-    }
-
-    private void editEvent(Event event) {
-        sendRequest(eventService.updateEvent(mEventId, event));
-    }
-
-    private void deleteEvent() {
-        sendRequest(eventService.deleteEvent(mEventId));
     }
 
     private void sendRequest(Call<Event> call) {

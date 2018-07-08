@@ -4,7 +4,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import me.marvinyan.ralendac.model.Event;
+import me.marvinyan.ralendac.data.Event;
 import org.joda.time.DateTime;
 
 public class EventUtils {

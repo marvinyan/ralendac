@@ -1,4 +1,4 @@
-package me.marvinyan.ralendac.net;
+package me.marvinyan.ralendac.util.network;
 
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;

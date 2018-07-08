@@ -10,7 +10,7 @@
     android:focusableInTouchMode="true"
     android:gravity="center_vertical"
     android:orientation="vertical"
-    tools:context=".EventActivity">
+    tools:context=".events.EventActivity">
 
     <TextView
         android:id="@+id/tv_selected_date"

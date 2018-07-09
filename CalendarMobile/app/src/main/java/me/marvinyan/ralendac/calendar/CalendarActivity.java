@@ -12,7 +12,6 @@ import org.joda.time.DateTime;
 public class CalendarActivity extends AppCompatActivity {
 
     private CalendarPresenter mCalendarPresenter;
-
     private DateTime mDisplayedMonth;
 
     @Override

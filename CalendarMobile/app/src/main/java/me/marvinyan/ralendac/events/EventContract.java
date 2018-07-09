@@ -1,5 +1,5 @@
 package me.marvinyan.ralendac.events;
 
-public class EventContract {
+public interface EventContract {
 
 }

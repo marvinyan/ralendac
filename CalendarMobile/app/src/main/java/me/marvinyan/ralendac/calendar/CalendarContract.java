@@ -8,7 +8,9 @@ import me.marvinyan.ralendac.data.Event;
 import org.joda.time.DateTime;
 
 public interface CalendarContract {
+
     interface View extends BaseView<Presenter> {
+
         void showNewEventUi(DateTime selectedDate);
 
         void showEditEventUi(Event selectedEvent);
@@ -23,6 +25,7 @@ public interface CalendarContract {
     }
 
     interface Presenter extends BasePresenter {
+
         void loadEvents();
 
         void refreshCalendar(DateTime displayedMonth);
